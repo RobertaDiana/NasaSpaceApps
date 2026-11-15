@@ -15,46 +15,46 @@ st.set_page_config(
 
 st.title("🌾 GAEZ v5 Data Dashboard")
 st.caption(
-    "Catalogul oficial FAO/IIASA pentru explorare, filtrare și reutilizare "
-    "în aplicații web."
+    "The official FAO/IIASA catalog for exploration, filtering, and reuse "
+    "in web applications."
 )
 
 
-@st.cache_data(ttl=3600, show_spinner="Se încarcă catalogul GAEZ de la FAO...")
+@st.cache_data(ttl=3600, show_spinner="Loading the GAEZ catalog from FAO...")
 def get_catalog(dataset_name: str) -> pd.DataFrame:
     return load_catalog(CATALOGS[dataset_name])
 
 
 with st.sidebar:
     st.header("Dataset")
-    dataset_name = st.selectbox("Alege tema", list(CATALOGS))
+    dataset_name = st.selectbox("Choose a dataset", list(CATALOGS))
     st.divider()
     st.markdown(
-        "**Sursă:** [GAEZ v5 Platform]"
+        "**Source:** [GAEZ v5 Platform]"
         "(https://data.apps.fao.org/gaez/?lang=en)  \n"
-        "**Licență:** CC BY 4.0"
+        "**License:** CC BY 4.0"
     )
 
 try:
     catalog = get_catalog(dataset_name)
 except Exception as error:
-    st.error(f"Catalogul nu a putut fi încărcat: {error}")
+    st.error(f"The catalog could not be loaded: {error}")
     st.stop()
 
 with st.sidebar:
-    st.header("Filtre")
+    st.header("Filters")
 
     def options(column: str) -> list[str]:
         return sorted(catalog[column].dropna().astype(str).unique())
 
-    selected_variables = st.multiselect("Variabilă", options("VARIABLE"))
-    selected_periods = st.multiselect("Perioadă", options("PERIOD"))
+    selected_variables = st.multiselect("Variable", options("VARIABLE"))
+    selected_periods = st.multiselect("Period", options("PERIOD"))
     selected_climates = st.multiselect(
-        "Sursă climatică", options("CLIMATE_DATA_SOURCE")
+        "Climate source", options("CLIMATE_DATA_SOURCE")
     )
-    selected_ssps = st.multiselect("Scenariu SSP", options("SSP"))
-    selected_crops = st.multiselect("Cultură", options("CROP"))
-    selected_inputs = st.multiselect("Management / apă", options("INPUT"))
+    selected_ssps = st.multiselect("SSP scenario", options("SSP"))
+    selected_crops = st.multiselect("Crop", options("CROP"))
+    selected_inputs = st.multiselect("Management / water", options("INPUT"))
 
 filtered = filter_catalog(
     catalog,
@@ -69,18 +69,18 @@ filtered = filter_catalog(
 )
 
 metric_columns = st.columns(4)
-metric_columns[0].metric("Fișiere disponibile", f"{len(catalog):,}")
-metric_columns[1].metric("Rezultate filtrate", f"{len(filtered):,}")
-metric_columns[2].metric("Variabile", filtered["VARIABLE"].nunique())
-metric_columns[3].metric("Culturi", filtered["CROP"].nunique())
+metric_columns[0].metric("Available files", f"{len(catalog):,}")
+metric_columns[1].metric("Filtered results", f"{len(filtered):,}")
+metric_columns[2].metric("Variables", filtered["VARIABLE"].nunique())
+metric_columns[3].metric("Crops", filtered["CROP"].nunique())
 
-st.subheader("Distribuția selecției")
+st.subheader("Selection distribution")
 chart_columns = st.columns(2)
 with chart_columns[0]:
-    st.caption("Fișiere pe perioadă")
+    st.caption("Files by period")
     st.bar_chart(filtered["PERIOD"].value_counts().sort_index())
 with chart_columns[1]:
-    st.caption("Fișiere pe cultură — primele 20")
+    st.caption("Files by crop — top 20")
     st.bar_chart(filtered["CROP"].value_counts().head(20))
 
 regional_path = "data/romania_gaez_hp0120_hist.csv"
@@ -90,11 +90,11 @@ except FileNotFoundError:
     regional = pd.DataFrame()
 
 if not regional.empty:
-    st.subheader("🗺️ Harta interactivă România")
+    st.subheader("🗺️ Interactive Romania map")
     st.info(
-        "Alege un județ, o cultură și un indicator. Harta este centrată pe "
-        "Călărași, Ialomița, Constanța sau Tulcea. Celulele sunt pixeli GAEZ "
-        "de aproximativ 5 arc-minute, nu parcele cadastrale."
+        "Choose a county, crop, and indicator. The map is centered on "
+        "Călărași, Ialomița, Constanța, or Tulcea. Cells are GAEZ pixels "
+        "of approximately 5 arc-minutes, not cadastral cells."
     )
     map_columns = st.columns(4)
     region_labels = {
@@ -104,14 +104,14 @@ if not regional.empty:
         "Tulcea": "Tulcea",
     }
     region = map_columns[0].selectbox(
-        "Județ / zonă",
+        "County / region",
         sorted(regional["region"].unique()),
         index=0,
         format_func=lambda value: region_labels.get(value, value),
         key="map_region",
     )
     map_variable = map_columns[1].selectbox(
-        "Indicator hartă",
+        "Map indicator",
         ["RES05-SIX", "RES05-YLX", "RES02-WDE"],
         format_func=lambda value: {
             "RES05-SIX": "Suitability index",
@@ -121,7 +121,7 @@ if not regional.empty:
         key="map_variable",
     )
     map_crop = map_columns[2].selectbox(
-        "Cultură",
+        "Crop",
         sorted(regional[regional["variable"] == map_variable]["crop"].unique()),
         key="map_crop",
     )
@@ -139,16 +139,16 @@ if not regional.empty:
         & (regional["status"] == "ok")
     ]
     if selected_rows.empty:
-        st.warning("Nu există un raster disponibil pentru combinația selectată.")
+        st.warning("No raster is available for the selected combination.")
     else:
         selected = selected_rows.iloc[0]
-        st.metric("Media regională", f"{selected['value_mean']:.2f}")
+        st.metric("Regional average", f"{selected['value_mean']:.2f}")
         boundaries = load_boundaries()
         points = raster_points(
             selected["source_url"], {region: boundaries[region]}
         )
         if points.empty:
-            st.warning("Rasterul nu conține pixeli valizi în zona selectată.")
+            st.warning("The raster contains no valid pixels in the selected area.")
         else:
             deck = pdk.Deck(
                 map_style=None,
@@ -167,18 +167,18 @@ if not regional.empty:
                         pickable=True,
                     )
                 ],
-                tooltip={"text": "Valoare: {value}\nRegiune: {region}"},
+                tooltip={"text": "Value: {value}\nRegion: {region}"},
             )
             st.pydeck_chart(deck, use_container_width=True)
             st.caption(
-                f"{len(points)} celule GAEZ afișate pentru "
+                f"{len(points)} GAEZ cells displayed for "
                 f"{region_labels.get(region, region)}."
             )
 
-st.subheader("Catalog filtrat")
+st.subheader("Filtered catalog")
 st.caption(
-    "Linkurile deschid rasterul GeoTIFF original. Descarcă CSV-ul pentru "
-    "a transmite selecția către o altă aplicație."
+    "Links open the original GeoTIFF raster. Download the CSV to "
+    "share the selection with another application."
 )
 
 download_frame = filtered.copy()
@@ -202,11 +202,11 @@ st.write(
     unsafe_allow_html=True,
 )
 if len(filtered) > 500:
-    st.info("Se afișează primele 500 de rezultate. Exportul CSV include toate rezultatele.")
+    st.info("Showing the first 500 results. The CSV export includes all results.")
 
 csv_bytes = filtered.to_csv(index=False).encode("utf-8")
 st.download_button(
-    "⬇️ Descarcă selecția CSV",
+    "⬇️ Download CSV selection",
     data=csv_bytes,
     file_name="gaez_v5_selection.csv",
     mime="text/csv",
@@ -214,6 +214,6 @@ st.download_button(
 
 st.divider()
 st.caption(
-    "Sursa datelor: FAO & IIASA (2025), Global Agro-Ecological Zoning version 5. "
-    "Accesată prin catalogul public FAO."
+    "Data source: FAO & IIASA (2025), Global Agro-Ecological Zoning version 5. "
+    "Accessed through the public FAO catalog."
 )

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ro">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgroSense NASA & FAO — Asistent Inteligent pentru Fermieri</title>
+    <title>AgroSense NASA & FAO — Intelligent Farming Assistant</title>
     <!-- Leaflet JS (Open-Source BSD-2-Clause) -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <!-- Google Fonts -->
@@ -244,48 +244,6 @@
         select:focus {
             border-color: var(--accent);
         }
-        .toggle-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: #0f172a;
-            border: 1px solid var(--border);
-            padding: 9px 12px;
-            border-radius: 8px;
-            font-size: 0.8rem;
-        }
-        .toggle-row input[type="checkbox"] {
-            accent-color: var(--accent);
-            width: 16px;
-            height: 16px;
-            cursor: pointer;
-        }
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 9px;
-        }
-        .kpi-card {
-            background-color: #0f172a;
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 11px;
-        }
-        .kpi-label {
-            font-size: 0.7rem;
-            color: var(--text-secondary);
-            margin-bottom: 3px;
-        }
-        .kpi-value {
-            font-size: 1.08rem;
-            font-weight: 800;
-            color: var(--accent);
-        }
-        .kpi-sub {
-            font-size: 0.68rem;
-            color: var(--text-muted);
-            margin-top: 2px;
-        }
 
         /* Map Area */
         .map-wrapper {
@@ -354,7 +312,7 @@
 
         /* Right Panel */
         .right-panel {
-            width: 440px;
+            width: 455px;
             background-color: var(--bg-panel);
             border-left: 1px solid var(--border);
             padding: 18px;
@@ -378,6 +336,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 6px;
         }
         .tag-mini {
             font-size: 0.68rem;
@@ -386,10 +345,15 @@
             background: rgba(56, 189, 248, 0.15);
             color: #38bdf8;
             font-weight: 600;
+            white-space: nowrap;
         }
         .tag-mini.green {
             background: rgba(16, 185, 129, 0.15);
             color: #34d399;
+        }
+        .tag-mini.warn {
+            background: rgba(245, 158, 11, 0.15);
+            color: #fbbf24;
         }
         .farmer-summary-box {
             background: rgba(30, 41, 59, 0.65);
@@ -404,20 +368,38 @@
         .inspector-row {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            padding: 6px 0;
+            align-items: flex-start;
+            padding: 8px 0;
             border-bottom: 1px solid rgba(148, 163, 184, 0.1);
             font-size: 0.8rem;
-            gap: 8px;
+            gap: 12px;
         }
         .inspector-row:last-child {
             border-bottom: none;
+        }
+        .inspector-label {
+            color: var(--text-secondary);
+            line-height: 1.35;
+            flex: 1;
+        }
+        .inspector-sub {
+            display: block;
+            font-size: 0.69rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+        .inspector-value {
+            text-align: right;
+            line-height: 1.35;
+            flex-shrink: 0;
+            max-width: 52%;
         }
         .badge-class {
             padding: 3px 9px;
             border-radius: 6px;
             font-weight: 700;
             font-size: 0.74rem;
+            display: inline-block;
         }
         .nasa-grid {
             display: grid;
@@ -502,16 +484,20 @@
         <div class="brand-logo">🌱</div>
         <div class="brand-text">
             <h1>AgroSense NASA & FAO <span class="hackathon-tag">Space Apps 2026</span></h1>
-            <p>Asistent digital pentru fermieri: analiză sol, risc de secetă și plan de rotație pe 4 ani</p>
+            <p>Simple field guidance using soil, weather, and crop data</p>
         </div>
     </div>
     <div class="header-actions">
+        <div class="status-pill" id="gaezStatusPill">
+            <span class="status-dot"></span>
+            <span id="gaezStatusText">Field data: Ready</span>
+        </div>
         <div class="status-pill nasa" id="nasaStatusPill">
             <span class="status-dot"></span>
-            <span id="nasaStatusText">Sateliți NASA: Pregătit</span>
+            <span id="nasaStatusText">Weather data: Ready</span>
         </div>
-        <button class="btn" id="resetViewBtn">🗺️ Toată Regiunea</button>
-        <button class="btn btn-primary" id="exportCsvBtn">📥 Descarcă Raport CSV</button>
+        <button class="btn" id="resetViewBtn">🗺️ Entire Region</button>
+        <button class="btn btn-primary" id="exportCsvBtn">📥 Download CSV Report</button>
     </div>
 </header>
 
@@ -519,18 +505,18 @@
     <!-- Left Controls Sidebar -->
     <aside class="sidebar">
         <div class="step-guide">
-            <div class="step-guide-title">👋 Cum folosești aplicația (3 pași simpli)</div>
+            <div class="step-guide-title">👋 Check your field in 3 steps</div>
             <ol>
-                <li><strong>Alege județul și cultura</strong> pe care vrei să o evaluezi.</li>
-                <li><strong>Dă click pe parcela ta</strong> din hartă (fiecare pătrat reprezintă ~9x9 km de teren).</li>
-                <li>Primești automat <strong>diagnosticul de secetă NASA</strong> și <strong>planul de rotație pe 4 ani</strong>.</li>
+                <li><strong>Choose your county and crop.</strong></li>
+                <li><strong>Click a colored square</strong> near your farm on the map.</li>
+                <li>Get a simple field assessment and a <strong>4-year crop plan</strong>.</li>
             </ol>
         </div>
 
         <div class="control-group">
-            <label for="countySelect">1. Județul fermei tale</label>
+            <label for="countySelect">1. Where is your farm?</label>
             <select id="countySelect">
-                <option value="ALL">Toate județele monitorizate (Sud & Sud-Est)</option>
+                <option value="ALL">Show all monitored counties</option>
                 <option value="Călărași">Călărași</option>
                 <option value="Ialomița">Ialomița</option>
                 <option value="Constanța">Constanța</option>
@@ -545,141 +531,99 @@
         </div>
 
         <div class="control-group">
-            <label for="cropSelect">2. Cultura pe care vrei să o semeni</label>
+            <label for="cropSelect">2. What do you want to grow?</label>
             <select id="cropSelect">
-                <option value="maize">🌽 Porumb boabe</option>
-                <option value="wheat">🌾 Grâu de toamnă</option>
-                <option value="sunflower">🌻 Floarea-soarelui</option>
-                <option value="soybean">🫘 Soia</option>
-                <option value="alfalfa">🌿 Lucernă</option>
-                <option value="barley">🌾 Orz</option>
-                <option value="rapeseed">🌼 Rapiță</option>
-                <option value="potato">🥔 Cartof</option>
+                <option value="maize">🌽 Grain maize</option>
+                <option value="wheat">🌾 Winter wheat</option>
+                <option value="sunflower">🌻 Sunflower</option>
+                <option value="soybean">🫘 Soybean</option>
+                <option value="alfalfa">🌿 Alfalfa</option>
+                <option value="barley">🌾 Barley</option>
+                <option value="rapeseed">🌼 Rapeseed</option>
+                <option value="potato">🥔 Potato</option>
             </select>
         </div>
 
         <div class="control-group">
-            <label for="mgmtSelect">3. Cum lucrezi terenul?</label>
+            <label for="mgmtSelect">3. How do you work the field?</label>
             <select id="mgmtSelect">
-                <option value="HRLM">🚜 Neirigat — Tehnologie intensivă (îngrășăminte optime)</option>
-                <option value="HILM">💧 Irigat — Tehnologie intensivă (cu sistem de irigații)</option>
-                <option value="LRLM">🌱 Neirigat — Tehnologie redusă (inputuri minime)</option>
-                <option value="LILM">🚿 Irigat — Tehnologie redusă (inputuri minime)</option>
+                <option value="HRLM">🚜 Rainfed — Intensive technology (optimal fertilizers)</option>
+                <option value="HILM">💧 Irrigated — Intensive technology (with irrigation system)</option>
+                <option value="LRLM">🌱 Rainfed — Reduced technology (minimal inputs)</option>
+                <option value="LILM">🚿 Irrigated — Reduced technology (minimal inputs)</option>
             </select>
-            <span class="helper-hint">Poți schimba între „Neirigat” și „Irigat” ca să vezi cât crește producția estimată.</span>
+            <span class="helper-hint">Choose whether the field is irrigated and whether you use more or fewer inputs.</span>
         </div>
 
         <div class="control-group">
-            <label for="indicatorSelect">4. Ce vrei să vezi colorat pe hartă?</label>
+            <label for="indicatorSelect">4. What should the map show?</label>
             <select id="indicatorSelect">
-                <option value="SIX">⭐ Cât de bun este terenul pentru cultură (Scor 0–10.000)</option>
-                <option value="YLX">⚖️ Producția estimată la hectar (kg/ha)</option>
-                <option value="WDE">🌵 Lipsa de apă / Seceta anuală (mm/an)</option>
+                <option value="SIX">⭐ Overall land quality for this crop</option>
+                <option value="YLX">⚖️ Expected harvest (kg per hectare)</option>
+                <option value="WDE">🌵 Water shortage during the year</option>
+                <option value="CBD">📅 Best time to start sowing</option>
+                <option value="CYL">⏳ How long the crop stays in the field</option>
+                <option value="FC2">💧 How much water limits the crop</option>
+                <option value="FC1">🌡️ How much heat limits the crop</option>
             </select>
         </div>
 
-        <div class="control-group">
-            <label for="nasaLayerSelect">5. Strat Satelitar NASA (Opțional)</label>
-            <select id="nasaLayerSelect">
-                <option value="NONE">Fără imagine satelitară peste parcele</option>
-                <option value="NDVI">🛰️ NASA NDVI — Starea verde a vegetației</option>
-                <option value="SMAP">💧 NASA SMAP — Umiditatea reală în sol</option>
-                <option value="LST">🌡️ NASA Temperatură Sol — Zone cu arșiță</option>
-            </select>
-            <span class="helper-hint">Imaginile vin direct de la sateliții NASA (MODIS și SMAP).</span>
-        </div>
-
-        <div class="control-group">
-            <label for="opacityRange">Transparență culori pe hartă: <span id="opacityVal">72%</span></label>
-            <input type="range" id="opacityRange" min="20" max="95" value="72">
-        </div>
-
-        <div class="kpi-grid">
-            <div class="kpi-card">
-                <div class="kpi-label">Media în zonă</div>
-                <div class="kpi-value" id="kpiAvg">—</div>
-                <div class="kpi-sub" id="kpiUnit">puncte</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-label">Cel mai bun teren</div>
-                <div class="kpi-value" id="kpiMax">—</div>
-                <div class="kpi-sub" id="kpiMaxCounty">—</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-label">Zone analizate</div>
-                <div class="kpi-value" id="kpiCount">—</div>
-                <div class="kpi-sub">fără suprapuneri</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-label">Calitate medie sol</div>
-                <div class="kpi-value" id="kpiClass">—</div>
-                <div class="kpi-sub">clasificare FAO</div>
-            </div>
-        </div>
     </aside>
 
     <!-- Interactive Map -->
     <main class="map-wrapper">
-        <div class="map-floating-tip">👆 Dă click pe orice pătrat colorat pentru a vedea vremea NASA și planul de cultură pe 4 ani</div>
+        <div class="map-floating-tip">👆 Click a colored square to see how suitable that area is for your crop</div>
         <div id="map"></div>
         <div class="legend-box">
-            <div class="legend-title" id="legendTitle">Cât de bun este terenul</div>
+            <div class="legend-title" id="legendTitle">Field quality</div>
             <div class="legend-scale" id="legendScale"></div>
         </div>
     </main>
 
     <!-- Right Farmer-Friendly Inspector & AI Panel -->
     <aside class="right-panel">
-        <!-- 1. AI 4-Year Crop Rotation Plan (Top Priority for Hackathon & Farmer) -->
+        <!-- 1. AI 4-Year Crop Rotation Plan -->
         <div class="ai-highlight-card">
             <div class="panel-section-title">
-                <span>🤖 Plan de Rotație pe 4 Ani (Asolament AI)</span>
+                <span>🤖 Your 4-Year Crop Plan</span>
                 <label style="font-size:0.72rem; color:#94a3b8; display:flex; align-items:center; gap:5px; cursor:pointer;">
-                    <input type="checkbox" id="autoAiOnClick" checked style="accent-color:#10b981;"> Automat la click
+                    <input type="checkbox" id="autoAiOnClick" checked style="accent-color:#10b981;"> Automatic on click
                 </label>
             </div>
-            <p class="helper-hint">Asistentul AI (Ollama) analizează toate cele 8 culturi și datele meteo NASA din ultimele 12 luni pentru a-ți propune ce să semeni în următorii 4 ani.</p>
-            <button class="btn btn-primary" id="askAiBtn" style="width:100%; justify-content:center; margin-top:8px;">✨ Generează / Actualizează Planul pe 4 Ani</button>
-            <div class="ai-result" id="aiResult">Dă click pe o zonă din hartă pentru a primi automat planul de rotație pe 4 ani...</div>
+            <p class="helper-hint">The assistant compares the crops and recent weather to suggest what to plant each year.</p>
+            <button class="btn btn-primary" id="askAiBtn" style="width:100%; justify-content:center; margin-top:8px;">✨ Create my 4-year plan</button>
+            <div class="ai-result" id="aiResult">Click a colored square to get a crop plan for your field...</div>
         </div>
 
-        <!-- 2. Plain-Language Parcel Diagnosis -->
+        <!-- 2. Plain-Language Cell Diagnosis (Live FAO GAEZ v4 + Local Fallback) -->
         <div class="card-section">
             <div class="panel-section-title">
-                <span>📍 Fișa Terenului Selectat</span>
-                <span class="tag-mini green" id="activeCellBadge">Nicio zonă aleasă</span>
+                <span>📍 Your Selected Field Area</span>
+                <div style="display:flex; gap:6px; align-items:center;">
+                    <span class="tag-mini" id="gaezSourceBadge">Live field data</span>
+                    <span class="tag-mini green" id="activeCellBadge">No cell selected</span>
+                </div>
             </div>
             <div id="cellInspector">
-                <p class="helper-hint">Selectează o parcelă de pe hartă pentru a vedea producția estimată și calitatea terenului.</p>
+                <p class="helper-hint">Select a colored square on the map to see the field quality and expected harvest.</p>
             </div>
         </div>
 
         <!-- 3. NASA Live Satellite & Weather Check -->
         <div class="card-section">
             <div class="panel-section-title">
-                <span>🛰️ Date Satelitare NASA (Ultimele 12 Luni)</span>
-                <span class="tag-mini" id="nasaFetchBadge">Live NASA POWER</span>
+                <span>🛰️ Recent Weather & Soil Conditions</span>
+                <span class="tag-mini" id="nasaFetchBadge">Weather check</span>
             </div>
             <div id="nasaPanelContent">
-                <p class="helper-hint">Se preiau datele reale de precipitații, temperatură și umiditate a solului de la NASA...</p>
+                <p class="helper-hint">Checking the last 12 months of rain, temperature, and soil moisture...</p>
             </div>
         </div>
 
-        <!-- 4. Monthly Rain vs Evaporation Chart -->
+        <!-- 4. County Comparison Chart -->
         <div class="card-section">
             <div class="panel-section-title">
-                <span>🌧️ Ploi vs. Evaporare Apă (Ultimele 12 Luni)</span>
-            </div>
-            <p class="helper-hint" style="margin-bottom:6px;">Când linia portocalie (evaporarea) depășește barele albastre (ploaia), cultura suferă de secetă.</p>
-            <div class="chart-container">
-                <canvas id="nasaTimeSeriesChart"></canvas>
-            </div>
-        </div>
-
-        <!-- 5. County Comparison Chart -->
-        <div class="card-section">
-            <div class="panel-section-title">
-                <span>📊 Comparație între Județe</span>
+                <span>📊 Compare Areas</span>
             </div>
             <div class="chart-container">
                 <canvas id="countyChart"></canvas>
@@ -691,43 +635,222 @@
 <!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    // NASA GIBS (Global Imagery Browse Services) WMS Endpoint for MODIS/VIIRS NDVI, SMAP & LST
-    const NASA_GIBS_WMS = "https://gibs.earthdata.nasa.gov/wms/epsg3857/best/wms.cgi";
-
-    const NASA_GIBS_LAYERS = {
-        NDVI: {
-            layer: "MODIS_Terra_NDVI_8Day",
-            title: "MODIS Terra NDVI (8-Day)"
+    // =========================================================================
+    // 1. LIVE FAO GAEZ v4 DATA PORTAL (ArcGIS ImageServer & Google Cloud Storage)
+    // =========================================================================
+    // Official FAO GAEZ v4 ArcGIS ImageServer REST endpoints (CRUTS32 1981-2010 baseline)
+    const GAEZ_ARCGIS_BASE = "https://gaez-data-portal-hqfao.hub.arcgis.com";
+    const GAEZ_SERVICES = {
+        // RES05: Suitability & Attainable Yield (SIX = Suitability Index, YLX = Attainable Yield)
+        SIX: {
+            serviceUrl: "https://data.apps.fao.org/map/gsrv/gsrv1/gaez4/wms",
+            wcsUrl: "https://data.apps.fao.org/map/gsrv/gsrv1/gaez4/wcs",
+            arcgisUrl: "https://gaez.fao.org/server/rest/services/GAEZ_v4",
+            theme: "RES05",
+            code: "SIX"
         },
-        SMAP: {
-            layer: "SMAP_L4_Analyzed_Root_Zone_Soil_Moisture",
-            title: "NASA SMAP Root Zone Soil Moisture"
+        YLX: {
+            serviceUrl: "https://data.apps.fao.org/map/gsrv/gsrv1/gaez4/wms",
+            wcsUrl: "https://data.apps.fao.org/map/gsrv/gsrv1/gaez4/wcs",
+            arcgisUrl: "https://gaez.fao.org/server/rest/services/GAEZ_v4",
+            theme: "RES05",
+            code: "YLX"
         },
-        LST: {
-            layer: "MODIS_Terra_Land_Surface_Temp_Day",
-            title: "MODIS Land Surface Temp (Day)"
+        // RES02: Agro-climatic Potential Yield & Water/Thermal Factors
+        WDE: {
+            serviceUrl: "https://data.apps.fao.org/map/gsrv/gsrv1/gaez4/wms",
+            wcsUrl: "https://data.apps.fao.org/map/gsrv/gsrv1/gaez4/wcs",
+            arcgisUrl: "https://gaez.fao.org/server/rest/services/GAEZ_v4",
+            theme: "RES02",
+            code: "WDE"
+        },
+        CBD: {
+            serviceUrl: "https://data.apps.fao.org/map/gsrv/gsrv1/gaez4/wms",
+            wcsUrl: "https://data.apps.fao.org/map/gsrv/gsrv1/gaez4/wcs",
+            arcgisUrl: "https://gaez.fao.org/server/rest/services/GAEZ_v4",
+            theme: "RES02",
+            code: "CBD"
+        },
+        CYL: {
+            serviceUrl: "https://data.apps.fao.org/map/gsrv/gsrv1/gaez4/wms",
+            wcsUrl: "https://data.apps.fao.org/map/gsrv/gsrv1/gaez4/wcs",
+            arcgisUrl: "https://gaez.fao.org/server/rest/services/GAEZ_v4",
+            theme: "RES02",
+            code: "CYL"
+        },
+        FC2: {
+            serviceUrl: "https://data.apps.fao.org/map/gsrv/gsrv1/gaez4/wms",
+            wcsUrl: "https://data.apps.fao.org/map/gsrv/gsrv1/gaez4/wcs",
+            arcgisUrl: "https://gaez.fao.org/server/rest/services/GAEZ_v4",
+            theme: "RES02",
+            code: "FC2"
+        },
+        FC1: {
+            serviceUrl: "https://data.apps.fao.org/map/gsrv/gsrv1/gaez4/wms",
+            wcsUrl: "https://data.apps.fao.org/map/gsrv/gsrv1/gaez4/wcs",
+            arcgisUrl: "https://gaez.fao.org/server/rest/services/GAEZ_v4",
+            theme: "RES02",
+            code: "FC1"
         }
     };
 
+    // Official FAO GAEZ v4 GCS Bucket for direct Cloud-Optimized GeoTIFF / WCS / WMS layer naming
+    // Pattern: RES02 / RES05 -> CRUTS32 -> Hist -> 8110 -> {water}{input} -> {crop}_{indicator}.tif
+    // Water/Input mapping: HRLM -> H/R (Rainfed High), HILM -> H/I (Irrigated High), LRLM -> L/R, LILM -> L/I
+    const MGMT_TO_GAEZ_CODE = {
+        HRLM: { water: "R", input: "H", suffix: "hr" },
+        HILM: { water: "I", input: "H", suffix: "hi" },
+        LRLM: { water: "R", input: "L", suffix: "lr" },
+        LILM: { water: "I", input: "L", suffix: "li" }
+    };
+
+    const gaezLiveCache = {};
+
+    // Query live pixel values from FAO GAEZ v4 WMS GetFeatureInfo / ArcGIS ImageServer identify
+    async function querySingleGaezIndicator(lat, lng, theme, indicatorCode, cropCode, mgmtKey) {
+        const mCfg = MGMT_TO_GAEZ_CODE[mgmtKey] || MGMT_TO_GAEZ_CODE.HRLM;
+        const layerName = `gaez4:${theme.toLowerCase()}_cruts32_hist_8110_${mCfg.suffix}_${cropCode}_${indicatorCode.toLowerCase()}`;
+
+        // 1) Try FAO GeoServer WMS GetFeatureInfo (EPSG:4326)
+        const delta = 0.0416667; // 5 arc-minutes (~9 km GAEZ native pixel)
+        const bbox = `${lat - delta},${lng - delta},${lat + delta},${lng + delta}`;
+        const wmsParams = new URLSearchParams({
+            SERVICE: "WMS",
+            VERSION: "1.3.0",
+            REQUEST: "GetFeatureInfo",
+            LAYERS: layerName,
+            QUERY_LAYERS: layerName,
+            CRS: "EPSG:4326",
+            BBOX: bbox,
+            WIDTH: "3",
+            HEIGHT: "3",
+            I: "1",
+            J: "1",
+            INFO_FORMAT: "application/json"
+        });
+
+        const wmsUrl = `https://data.apps.fao.org/map/gsrv/gsrv1/gaez4/wms?${wmsParams.toString()}`;
+
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 4500);
+            const res = await fetch(wmsUrl, { signal: controller.signal });
+            clearTimeout(timeoutId);
+
+            if (res.ok) {
+                const json = await res.json();
+                if (json && Array.isArray(json.features) && json.features.length > 0) {
+                    const props = json.features[0].properties || {};
+                    const rawVal = props.GRAY_INDEX ?? props.Band1 ?? props.value ?? Object.values(props).find(v => typeof v === 'number');
+                    if (typeof rawVal === 'number' && !Number.isNaN(rawVal) && rawVal > -9000) {
+                        return rawVal;
+                    }
+                }
+            }
+        } catch (_) {
+            // Fall through to ArcGIS ImageServer identify endpoint
+        }
+
+        // 2) Fallback: Try FAO GAEZ v4 ArcGIS ImageServer identify REST API
+        const serviceFolder = theme === "RES05" ? "RES05_Suitability_Attainable_Yield" : "RES02_Agro_Climatic_Potential_Yield";
+        const serviceName = `${theme}_CRUTS32_Hist_8110_${mCfg.water}_${mCfg.input}_${cropCode.toUpperCase()}_${indicatorCode}`;
+        const arcgisIdentifyUrl = `https://gaez.fao.org/server/rest/services/${serviceFolder}/${serviceName}/ImageServer/identify?geometry=${encodeURIComponent(JSON.stringify({ x: lng, y: lat, spatialReference: { wkid: 4326 } }))}&geometryType=esriGeometryPoint&returnGeometry=false&returnCatalogItems=false&f=json`;
+
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 4500);
+            const res = await fetch(arcgisIdentifyUrl, { signal: controller.signal });
+            clearTimeout(timeoutId);
+
+            if (res.ok) {
+                const json = await res.json();
+                if (json && json.value !== undefined && json.value !== "NoData") {
+                    const num = Number(json.value);
+                    if (!Number.isNaN(num) && num > -9000) {
+                        return num;
+                    }
+                }
+            }
+        } catch (_) {
+            // Live endpoint unreachable (CORS / network); caller will smoothly fall back to calibrated GAEZ model
+        }
+
+        return null;
+    }
+
+    async function fetchLiveGaezForCell(cell, cropKey, mgmtKey) {
+        const cacheKey = `${cell.id}_${cropKey}_${mgmtKey}`;
+        if (gaezLiveCache[cacheKey]) {
+            return gaezLiveCache[cacheKey];
+        }
+
+        const crop = CROP_PARAMS[cropKey];
+        const indicatorSpecs = [
+            { key: "six", theme: "RES05", code: "SIX" },
+            { key: "ylx", theme: "RES05", code: "YLX" },
+            { key: "wde", theme: "RES02", code: "WDE" },
+            { key: "cbd", theme: "RES02", code: "CBD" },
+            { key: "cyl", theme: "RES02", code: "CYL" },
+            { key: "fc2", theme: "RES02", code: "FC2" },
+            { key: "fc1", theme: "RES02", code: "FC1" }
+        ];
+
+        const results = await Promise.all(
+            indicatorSpecs.map(spec =>
+                querySingleGaezIndicator(cell.lat, cell.lng, spec.theme, spec.code, crop.code, mgmtKey)
+            )
+        );
+
+        const parsed = {};
+        let liveHits = 0;
+        indicatorSpecs.forEach((spec, idx) => {
+            let val = results[idx];
+            if (val !== null) {
+                // GAEZ v4 stores FC1 & FC2 scaled by 100 or 10000 in some rasters; normalize to 0.00 - 1.00
+                if ((spec.key === "fc1" || spec.key === "fc2") && val > 1.0) {
+                    val = val > 100 ? val / 10000 : val / 100;
+                }
+                if (spec.key === "cbd" || spec.key === "cyl" || spec.key === "six" || spec.key === "ylx" || spec.key === "wde") {
+                    val = Math.round(val);
+                } else {
+                    val = Number(Math.min(1.0, Math.max(0.0, val)).toFixed(2));
+                }
+                parsed[spec.key] = val;
+                liveHits++;
+            }
+        });
+
+        const payload = { liveHits, totalRequested: indicatorSpecs.length, values: parsed };
+        gaezLiveCache[cacheKey] = payload;
+        return payload;
+    }
+
+    // NASA GIBS (Global Imagery Browse Services) WMS Endpoint
+    const NASA_GIBS_WMS = "https://gibs.earthdata.nasa.gov/wms/epsg3857/best/wms.cgi";
+    const NASA_GIBS_LAYERS = {
+        NDVI: { layer: "MODIS_Terra_NDVI_8Day", title: "MODIS Terra NDVI (8-Day)" },
+        SMAP: { layer: "SMAP_L4_Analyzed_Root_Zone_Soil_Moisture", title: "NASA SMAP Root Zone Soil Moisture" },
+        LST:  { layer: "MODIS_Terra_Land_Surface_Temp_Day", title: "MODIS Land Surface Temp (Day)" }
+    };
+
     const CROP_PARAMS = {
-        maize:     { code: "maiz", name: "Porumb boabe", baseSix: 6800, maxYield: 11800, waterNeed: 410 },
-        wheat:     { code: "whea", name: "Grâu de toamnă", baseSix: 7400, maxYield: 8600, waterNeed: 290 },
-        sunflower: { code: "sunf", name: "Floarea-soarelui", baseSix: 7200, maxYield: 4200, waterNeed: 320 },
-        soybean:   { code: "soyb", name: "Soia", baseSix: 6100, maxYield: 4100, waterNeed: 440 },
-        alfalfa:   { code: "alfa", name: "Lucernă", baseSix: 6900, maxYield: 12500, waterNeed: 480 },
-        barley:    { code: "barl", name: "Orz", baseSix: 7300, maxYield: 7900, waterNeed: 270 },
-        rapeseed:  { code: "rape", name: "Rapiță", baseSix: 6700, maxYield: 4500, waterNeed: 310 },
-        potato:    { code: "pota", name: "Cartof", baseSix: 5400, maxYield: 36000, waterNeed: 460 }
+        maize:     { code: "maiz", name: "Grain maize", baseSix: 6800, maxYield: 11800, waterNeed: 410, baseCbd: 108, baseCyl: 138, waterSens: 0.34, thermBase: 0.91 },
+        wheat:     { code: "whea", name: "Winter wheat", baseSix: 7400, maxYield: 8600, waterNeed: 290, baseCbd: 282, baseCyl: 268, waterSens: 0.18, thermBase: 0.94 },
+        sunflower: { code: "sunf", name: "Sunflower", baseSix: 7200, maxYield: 4200, waterNeed: 320, baseCbd: 102, baseCyl: 128, waterSens: 0.22, thermBase: 0.93 },
+        soybean:   { code: "soyb", name: "Soybean", baseSix: 6100, maxYield: 4100, waterNeed: 440, baseCbd: 115, baseCyl: 132, waterSens: 0.38, thermBase: 0.89 },
+        alfalfa:   { code: "alfa", name: "Alfalfa", baseSix: 6900, maxYield: 12500, waterNeed: 480, baseCbd: 88,  baseCyl: 195, waterSens: 0.35, thermBase: 0.92 },
+        barley:    { code: "barl", name: "Barley", baseSix: 7300, maxYield: 7900, waterNeed: 270, baseCbd: 276, baseCyl: 256, waterSens: 0.16, thermBase: 0.95 },
+        rapeseed:  { code: "rape", name: "Rapeseed", baseSix: 6700, maxYield: 4500, waterNeed: 310, baseCbd: 248, baseCyl: 284, waterSens: 0.24, thermBase: 0.90 },
+        potato:    { code: "pota", name: "Potato", baseSix: 5400, maxYield: 36000, waterNeed: 460, baseCbd: 95,  baseCyl: 118, waterSens: 0.42, thermBase: 0.85 }
     };
 
     const MGMT_PARAMS = {
-        HRLM: { label: "Neirigat (Tehnologie intensivă)", sixMult: 0.86, yieldMult: 0.82, wdeMult: 1.00 },
-        HILM: { label: "Irigat (Tehnologie intensivă)", sixMult: 1.18, yieldMult: 1.24, wdeMult: 0.15 },
-        LRLM: { label: "Neirigat (Inputuri reduse)", sixMult: 0.54, yieldMult: 0.48, wdeMult: 1.00 },
-        LILM: { label: "Irigat (Inputuri reduse)", sixMult: 0.78, yieldMult: 0.74, wdeMult: 0.18 }
+        HRLM: { label: "Rainfed (Intensive technology)", sixMult: 0.86, yieldMult: 0.82, wdeMult: 1.00 },
+        HILM: { label: "Irrigated (Intensive technology)", sixMult: 1.18, yieldMult: 1.24, wdeMult: 0.15 },
+        LRLM: { label: "Rainfed (Reduced inputs)", sixMult: 0.54, yieldMult: 0.48, wdeMult: 1.00 },
+        LILM: { label: "Irrigated (Reduced inputs)", sixMult: 0.78, yieldMult: 0.74, wdeMult: 0.18 }
     };
 
-    // Non-overlapping regular 0.10-degree (~11 km) spatial grid partitioned cleanly by nearest county center
     const COUNTIES = {
         "Călărași":  { center: [44.28, 27.15], radius: 0.55, soilFactor: 1.12, aridFactor: 1.18 },
         "Ialomița":  { center: [44.65, 27.35], radius: 0.52, soilFactor: 1.14, aridFactor: 1.15 },
@@ -746,7 +869,6 @@
         return x - Math.floor(x);
     }
 
-    // Generate a completely disjoint (non-overlapping) grid across Southern & South-Eastern Romania
     const GRID_STEP = 0.10;
     const gridCells = [];
     let cellIdCounter = 1;
@@ -757,7 +879,6 @@
             let minDist = Infinity;
 
             Object.entries(COUNTIES).forEach(([cName, cfg]) => {
-                // Adjust longitude distance for latitude (~44.5N) so regions are well-proportioned
                 const dLat = lat - cfg.center[0];
                 const dLng = (lng - cfg.center[1]) * 0.72;
                 const dist = Math.sqrt(dLat * dLat + dLng * dLng);
@@ -771,7 +892,7 @@
                 const cfg = COUNTIES[nearestCounty];
                 const noise = seededRandom(Math.round(lat * 1000) * 31 + Math.round(lng * 1000) * 17);
                 gridCells.push({
-                    id: `PARCELA-${String(cellIdCounter++).padStart(3, '0')}`,
+                    id: `CELULA-${String(cellIdCounter++).padStart(3, '0')}`,
                     county: nearestCounty,
                     lat: Number(lat.toFixed(4)),
                     lng: Number(lng.toFixed(4)),
@@ -787,6 +908,50 @@
         }
     }
 
+    function dayOfYearToDateLabel(doy) {
+        const date = new Date(Date.UTC(2025, 0, 1));
+        date.setUTCDate(doy);
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+    }
+
+    function describeLimitationFactor(factor) {
+        const penaltyPct = Math.max(0, Math.round((1 - factor) * 100));
+        if (penaltyPct <= 5)  return { text: `Minimal (${penaltyPct}% loss)`, color: '#34d399' };
+        if (penaltyPct <= 12) return { text: `Low (${penaltyPct}% loss)`, color: '#38bdf8' };
+        if (penaltyPct <= 22) return { text: `Moderate (${penaltyPct}% loss)`, color: '#fbbf24' };
+        return { text: `Severe (${penaltyPct}% loss)`, color: '#f87171' };
+    }
+
+    function classifyFaoSuitability(six) {
+        if (six >= 7500) {
+            return {
+                faoClass: 'S1 — Excellent land (highly suitable)',
+                farmerVerdict: 'Ideal soil and climate conditions. The crop can reach maximum yields here.',
+                classColor: '#10b981'
+            };
+        }
+        if (six >= 5500) {
+            return {
+                faoClass: 'S2 — Good land (suitable)',
+                farmerVerdict: 'Land suitable for the crop, with good yields when the recommended technology is followed.',
+                classColor: '#38bdf8'
+            };
+        }
+        if (six < 3500) {
+            return {
+                faoClass: 'N — Not recommended',
+                farmerVerdict: 'Very high risk of crop failure. Choose another crop from the rotation plan.',
+                classColor: '#ef4444'
+            };
+        }
+        return {
+            faoClass: 'S3 — Marginal land (high risk)',
+            farmerVerdict: 'Land with limited potential for this crop without irrigation or soil improvement.',
+            classColor: '#f59e0b'
+        };
+    }
+
+    // Computes baseline metrics and merges any live FAO GAEZ v4 raster values already retrieved for this cell
     function computeCellMetrics(cell, cropKey, mgmtKey) {
         const crop = CROP_PARAMS[cropKey];
         const mgmt = MGMT_PARAMS[mgmtKey];
@@ -795,29 +960,57 @@
         if (mgmtKey.includes('R')) {
             rawSix *= (1.15 - (cell.aridFactor - 1.0) * 0.65);
         }
-        const six = Math.min(9850, Math.max(850, Math.round(rawSix)));
-        const ylx = Math.round((six / 10000) * crop.maxYield * (mgmtKey.includes('H') ? 1.04 : 0.92));
-        const wde = Math.round(crop.waterNeed * cell.aridFactor * mgmt.wdeMult * (1.15 - cell.localQuality * 0.25));
+        let six = Math.min(9850, Math.max(850, Math.round(rawSix)));
+        let ylx = Math.round((six / 10000) * crop.maxYield * (mgmtKey.includes('H') ? 1.04 : 0.92));
+        let wde = Math.round(crop.waterNeed * cell.aridFactor * mgmt.wdeMult * (1.15 - cell.localQuality * 0.25));
 
-        let faoClass = 'S3 — Teren marginal (risc ridicat)';
-        let farmerVerdict = 'Teren cu potențial limitat pentru această cultură fără irigații sau ameliorare.';
-        let classColor = '#f59e0b';
+        const latShift = Math.round((cell.lat - 44.3) * 4.5);
+        let cbd = Math.min(365, Math.max(1, crop.baseCbd + latShift + Math.round((1.0 - cell.localQuality) * 6)));
+        let cyl = Math.round(crop.baseCyl + (cell.lat - 44.3) * 5.0 - (cell.aridFactor - 1.1) * 14.0);
 
-        if (six >= 7500) {
-            faoClass = 'S1 — Teren excelent (foarte favorabil)';
-            farmerVerdict = 'Condiții ideale de sol și climă. Cultura poate atinge producții maxime aici.';
-            classColor = '#10b981';
-        } else if (six >= 5500) {
-            faoClass = 'S2 — Teren bun (favorabil)';
-            farmerVerdict = 'Teren potrivit pentru cultură, cu producții bune dacă se respectă tehnologia.';
-            classColor = '#38bdf8';
-        } else if (six < 3500) {
-            faoClass = 'N — Nerecomandat';
-            farmerVerdict = 'Risc foarte mare de pierdere a recoltei. Alege o altă cultură din planul de rotație.';
-            classColor = '#ef4444';
+        const isIrrigated = mgmtKey.includes('I');
+        const rawFc2 = isIrrigated
+            ? Math.min(0.99, 0.94 + cell.localQuality * 0.04)
+            : 1.0 - crop.waterSens * (cell.aridFactor - 0.82) * (1.18 - cell.localQuality * 0.22);
+        let fc2 = Number(Math.min(0.99, Math.max(0.35, rawFc2)).toFixed(2));
+
+        const thermAdj = (44.5 - cell.lat) * (['maize', 'sunflower', 'soybean'].includes(cropKey) ? 0.025 : -0.015);
+        let fc1 = Number(Math.min(0.99, Math.max(0.65, crop.thermBase + thermAdj + (cell.localQuality - 1.0) * 0.06)).toFixed(2));
+
+        // Override with live FAO GAEZ v4 values if fetched for this cell/crop/management
+        const cacheKey = `${cell.id}_${cropKey}_${mgmtKey}`;
+        const cached = gaezLiveCache[cacheKey];
+        let isLiveGaez = false;
+        let liveHits = 0;
+
+        if (cached && cached.liveHits > 0) {
+            isLiveGaez = true;
+            liveHits = cached.liveHits;
+            const v = cached.values;
+            if (v.six !== undefined) six = v.six;
+            if (v.ylx !== undefined) ylx = v.ylx;
+            if (v.wde !== undefined) wde = v.wde;
+            if (v.cbd !== undefined) cbd = v.cbd;
+            if (v.cyl !== undefined) cyl = v.cyl;
+            if (v.fc2 !== undefined) fc2 = v.fc2;
+            if (v.fc1 !== undefined) fc1 = v.fc1;
         }
 
-        return { six, ylx, wde, faoClass, farmerVerdict, classColor };
+        const { faoClass, farmerVerdict, classColor } = classifyFaoSuitability(six);
+        return { six, ylx, wde, cbd, cyl, fc2, fc1, faoClass, farmerVerdict, classColor, isLiveGaez, liveHits };
+    }
+
+    function getMetricValue(metrics, indicator) {
+        switch (indicator) {
+            case 'SIX': return metrics.six;
+            case 'YLX': return metrics.ylx;
+            case 'WDE': return metrics.wde;
+            case 'CBD': return metrics.cbd;
+            case 'CYL': return metrics.cyl;
+            case 'FC2': return metrics.fc2;
+            case 'FC1': return metrics.fc1;
+            default:    return metrics.six;
+        }
     }
 
     function getColor(val, indicator, cropKey) {
@@ -835,61 +1028,53 @@
             if (ratio >= 0.50) return '#06b6d4';
             if (ratio >= 0.35) return '#38bdf8';
             return '#93c5fd';
-        } else {
+        } else if (indicator === 'WDE') {
             if (val >= 450) return '#b91c1c';
             if (val >= 350) return '#ea580c';
             if (val >= 250) return '#f59e0b';
             if (val >= 120) return '#fde047';
             return '#34d399';
+        } else if (indicator === 'CBD') {
+            if (val <= 95)  return '#34d399';
+            if (val <= 110) return '#38bdf8';
+            if (val <= 125) return '#0284c7';
+            if (val <= 265) return '#f59e0b';
+            return '#8b5cf6';
+        } else if (indicator === 'CYL') {
+            if (val >= 260) return '#1d4ed8';
+            if (val >= 190) return '#0284c7';
+            if (val >= 135) return '#10b981';
+            return '#f59e0b';
+        } else {
+            if (val >= 0.94) return '#047857';
+            if (val >= 0.89) return '#10b981';
+            if (val >= 0.83) return '#facc15';
+            if (val >= 0.76) return '#f97316';
+            return '#ef4444';
         }
     }
 
-    // Initialize Clean Open-Source Leaflet Map (No overlapping FAO WMS tiles)
+    // Initialize Clean Open-Source Leaflet Map
     const map = L.map('map', { zoomControl: true }).setView([44.52, 26.55], 8);
 
     const baseLayers = {
-        "Hartă Stradală & Localități": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+        "Street Map & Places": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
             attribution: 'Tiles &copy; Esri', maxZoom: 19
         }),
-        "Vedere din Satelit": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        "Satellite Imagery": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
             attribution: 'Tiles &copy; Esri', maxZoom: 18
         })
     };
 
-    baseLayers["Hartă Stradală & Localități"].addTo(map);
+    baseLayers["Street Map & Places"].addTo(map);
     L.control.layers(baseLayers, null, { position: 'topright' }).addTo(map);
     L.control.scale({ imperial: false, position: 'bottomright' }).addTo(map);
 
-    let nasaGibsWmsLayer = null;
     const rasterLayerGroup = L.layerGroup().addTo(map);
     let selectedCell = null;
     let lastNasaAnalysis = null;
     let countyChartInstance = null;
-    let nasaChartInstance = null;
     const nasaCache = {};
-
-    function updateNasaGibsLayer(nasaKey, opacity) {
-        if (nasaGibsWmsLayer) {
-            map.removeLayer(nasaGibsWmsLayer);
-            nasaGibsWmsLayer = null;
-        }
-        if (nasaKey === 'NONE' || !NASA_GIBS_LAYERS[nasaKey]) return;
-
-        const d = new Date();
-        d.setDate(d.getDate() - 10);
-        const dateStr = d.toISOString().split('T')[0];
-
-        const cfg = NASA_GIBS_LAYERS[nasaKey];
-        nasaGibsWmsLayer = L.tileLayer.wms(NASA_GIBS_WMS, {
-            layers: cfg.layer,
-            format: 'image/png',
-            transparent: true,
-            time: dateStr,
-            opacity: Math.min(0.85, opacity),
-            attribution: `NASA EOSDIS GIBS (${cfg.title})`
-        });
-        nasaGibsWmsLayer.addTo(map);
-    }
 
     function updateLegend(indicator, cropKey) {
         const titleEl = document.getElementById('legendTitle');
@@ -897,32 +1082,67 @@
         let items = [];
 
         if (indicator === 'SIX') {
-            titleEl.textContent = 'Cât de bun este terenul (Scor)';
+            titleEl.textContent = 'Field quality';
             items = [
-                { color: '#047857', label: '8,000 – 10,000 (Excelent)' },
-                { color: '#10b981', label: '6,500 – 7,999 (Foarte bun)' },
-                { color: '#84cc16', label: '5,000 – 6,499 (Bun)' },
-                { color: '#facc15', label: '3,500 – 4,999 (Moderat / Risc)' },
-                { color: '#f97316', label: '< 3,500 (Nerecomandat)' }
+                { color: '#047857', label: '8,000 – 10,000 (Excellent)' },
+                { color: '#10b981', label: '6,500 – 7,999 (Very good)' },
+                { color: '#84cc16', label: '5,000 – 6,499 (Good)' },
+                { color: '#facc15', label: '3,500 – 4,999 (Moderate / Risk)' },
+                { color: '#f97316', label: '< 3,500 (Not recommended)' }
             ];
         } else if (indicator === 'YLX') {
             const maxY = CROP_PARAMS[cropKey].maxYield;
-            titleEl.textContent = 'Producție Estimată (kg/hectar)';
+            titleEl.textContent = 'Expected harvest (kg/hectare)';
             items = [
-                { color: '#1d4ed8', label: `Peste ${Math.round(maxY * 0.8).toLocaleString()} kg/ha` },
+                { color: '#1d4ed8', label: `Above ${Math.round(maxY * 0.8).toLocaleString()} kg/ha` },
                 { color: '#0284c7', label: `${Math.round(maxY * 0.65).toLocaleString()} – ${Math.round(maxY * 0.8).toLocaleString()} kg/ha` },
                 { color: '#06b6d4', label: `${Math.round(maxY * 0.50).toLocaleString()} – ${Math.round(maxY * 0.65).toLocaleString()} kg/ha` },
                 { color: '#38bdf8', label: `${Math.round(maxY * 0.35).toLocaleString()} – ${Math.round(maxY * 0.50).toLocaleString()} kg/ha` },
-                { color: '#93c5fd', label: `Sub ${Math.round(maxY * 0.35).toLocaleString()} kg/ha` }
+                { color: '#93c5fd', label: `Below ${Math.round(maxY * 0.35).toLocaleString()} kg/ha` }
+            ];
+        } else if (indicator === 'WDE') {
+            titleEl.textContent = 'Water shortage (mm/year)';
+            items = [
+                { color: '#b91c1c', label: '≥ 450 mm (Severe drought)' },
+                { color: '#ea580c', label: '350 – 449 mm (High drought)' },
+                { color: '#f59e0b', label: '250 – 349 mm (Moderate drought)' },
+                { color: '#fde047', label: '120 – 249 mm (Low demand)' },
+                { color: '#34d399', label: '< 120 mm (No water stress)' }
+            ];
+        } else if (indicator === 'CBD') {
+            titleEl.textContent = 'Best sowing time';
+            items = [
+                { color: '#34d399', label: 'Day 1 – 95 (Early Spring: Mar)' },
+                { color: '#38bdf8', label: 'Day 96 – 110 (Mid Spring: Apr)' },
+                { color: '#0284c7', label: 'Day 111 – 125 (Late Spring: May)' },
+                { color: '#f59e0b', label: 'Day 240 – 265 (Early Autumn: Sep)' },
+                { color: '#8b5cf6', label: 'Day > 265 (Mid Autumn: Oct)' }
+            ];
+        } else if (indicator === 'CYL') {
+            titleEl.textContent = 'Time until harvest';
+            items = [
+                { color: '#1d4ed8', label: '≥ 260 days (Long winter cycle)' },
+                { color: '#0284c7', label: '190 – 259 days (Extended cycle)' },
+                { color: '#10b981', label: '135 – 189 days (Standard spring cycle)' },
+                { color: '#f59e0b', label: '< 135 days (Short / early cycle)' }
+            ];
+        } else if (indicator === 'FC2') {
+            titleEl.textContent = 'Water stress';
+            items = [
+                { color: '#047857', label: '0.94 – 1.00 (Minimal water limitation)' },
+                { color: '#10b981', label: '0.89 – 0.93 (Low water limitation)' },
+                { color: '#facc15', label: '0.83 – 0.88 (Moderate water limitation)' },
+                { color: '#f97316', label: '0.76 – 0.82 (High water limitation)' },
+                { color: '#ef4444', label: '< 0.76 (Severe water limitation)' }
             ];
         } else {
-            titleEl.textContent = 'Lipsă de Apă / Secetă (mm/an)';
+            titleEl.textContent = 'Heat stress';
             items = [
-                { color: '#b91c1c', label: '≥ 450 mm (Secetă severă)' },
-                { color: '#ea580c', label: '350 – 449 mm (Secetă ridicată)' },
-                { color: '#f59e0b', label: '250 – 349 mm (Secetă moderată)' },
-                { color: '#fde047', label: '120 – 249 mm (Necesar mic)' },
-                { color: '#34d399', label: '< 120 mm (Fără stres hidric)' }
+                { color: '#047857', label: '0.94 – 1.00 (Optimal thermal regime)' },
+                { color: '#10b981', label: '0.89 – 0.93 (Low thermal limitation)' },
+                { color: '#facc15', label: '0.83 – 0.88 (Moderate thermal limitation)' },
+                { color: '#f97316', label: '0.76 – 0.82 (High thermal limitation)' },
+                { color: '#ef4444', label: '< 0.76 (Severe thermal limitation)' }
             ];
         }
 
@@ -934,38 +1154,83 @@
         `).join('');
     }
 
-    function inspectCell(cell, metrics) {
+    function inspectCell(cell, metrics, isLoadingGaez = false) {
         const inspector = document.getElementById('cellInspector');
         const cropKey = document.getElementById('cropSelect').value;
         const cropName = CROP_PARAMS[cropKey].name;
         const tonsPerHa = (metrics.ylx / 1000).toFixed(2);
+        const sowingDateApprox = dayOfYearToDateLabel(metrics.cbd);
+        const waterLim = describeLimitationFactor(metrics.fc2);
+        const thermLim = describeLimitationFactor(metrics.fc1);
+        const sourceBadge = document.getElementById('gaezSourceBadge');
 
-        document.getElementById('activeCellBadge').textContent = `${cell.id} • Jud. ${cell.county}`;
+        if (isLoadingGaez) {
+            sourceBadge.className = 'tag-mini';
+            sourceBadge.textContent = 'Checking field data...';
+        } else if (metrics.isLiveGaez) {
+            sourceBadge.className = 'tag-mini green';
+            sourceBadge.textContent = `Live field data (${metrics.liveHits}/7)`;
+        } else {
+            sourceBadge.className = 'tag-mini warn';
+            sourceBadge.textContent = 'Estimated field data';
+        }
+
+        document.getElementById('activeCellBadge').textContent = `${cell.id} • County ${cell.county}`;
         inspector.innerHTML = `
             <div class="farmer-summary-box" style="border-left-color:${metrics.classColor}">
-                <strong>Verdict pentru ${cropName}:</strong> ${metrics.farmerVerdict}
+                <strong>Verdict for ${cropName}:</strong> ${metrics.farmerVerdict}
             </div>
             <div class="inspector-row">
-                <span style="color:var(--text-secondary)">Zonă & Coordonate:</span>
-                <strong>Jud. ${cell.county} (${cell.lat.toFixed(2)}°N, ${cell.lng.toFixed(2)}°E)</strong>
+                <span class="inspector-label">Area & Coordinates:</span>
+                <strong class="inspector-value">County ${cell.county} (${cell.lat.toFixed(2)}°N, ${cell.lng.toFixed(2)}°E)</strong>
             </div>
             <div class="inspector-row">
-                <span style="color:var(--text-secondary)">Calificare Teren:</span>
-                <span class="badge-class" style="background:${metrics.classColor}22; color:${metrics.classColor}; border:1px solid ${metrics.classColor}">
-                    ${metrics.faoClass}
+                <span class="inspector-label">Field quality:</span>
+                <div class="inspector-value">
+                    <span class="badge-class" style="background:${metrics.classColor}22; color:${metrics.classColor}; border:1px solid ${metrics.classColor}">
+                        ${metrics.faoClass}
+                    </span>
+                </div>
+            </div>
+            <div class="inspector-row">
+                <span class="inspector-label">Expected harvest:</span>
+                <strong class="inspector-value" style="color:#34d399;">~${tonsPerHa} tons/ha (${metrics.ylx.toLocaleString()} kg/ha)</strong>
+            </div>
+            <div class="inspector-row">
+                <span class="inspector-label">Field quality score:</span>
+                <strong class="inspector-value">${metrics.six.toLocaleString()} / 10,000 points</strong>
+            </div>
+            <div class="inspector-row">
+                <span class="inspector-label">Water shortage:</span>
+                <strong class="inspector-value" style="color:#fbbf24;">${metrics.wde} liters/m² (mm/year)</strong>
+            </div>
+            <div class="inspector-row">
+                <span class="inspector-label">
+                    Best sowing time:
+                    <span class="inspector-sub">Recommended start of sowing</span>
                 </span>
+                <strong class="inspector-value" style="color:#38bdf8;">Day ${metrics.cbd} (~${sowingDateApprox})</strong>
             </div>
             <div class="inspector-row">
-                <span style="color:var(--text-secondary)">Producție Estimată:</span>
-                <strong style="color:#34d399;">~${tonsPerHa} tone/ha (${metrics.ylx.toLocaleString()} kg/ha)</strong>
+                <span class="inspector-label">
+                    Time until harvest:
+                    <span class="inspector-sub">How long the crop stays in the field</span>
+                </span>
+                <strong class="inspector-value">${metrics.cyl} days</strong>
             </div>
             <div class="inspector-row">
-                <span style="color:var(--text-secondary)">Scor Favorabilitate:</span>
-                <strong>${metrics.six.toLocaleString()} / 10.000 puncte</strong>
+                <span class="inspector-label">
+                    Water stress:
+                    <span class="inspector-sub">How much dry weather can reduce the harvest</span>
+                </span>
+                <strong class="inspector-value" style="color:${waterLim.color};">${metrics.fc2.toFixed(2)} — ${waterLim.text}</strong>
             </div>
             <div class="inspector-row">
-                <span style="color:var(--text-secondary)">Necesar Apă Neacoperit (Mediu):</span>
-                <strong style="color:#fbbf24;">${metrics.wde} litri/m² (mm/an)</strong>
+                <span class="inspector-label">
+                    Heat stress:
+                    <span class="inspector-sub">How much temperature can reduce the harvest</span>
+                </span>
+                <strong class="inspector-value" style="color:${thermLim.color};">${metrics.fc1.toFixed(2)} — ${thermLim.text}</strong>
             </div>
         `;
     }
@@ -992,8 +1257,8 @@
         const endStr = formatNasaDate(end);
         const cacheKey = `${cell.lat.toFixed(2)}_${cell.lng.toFixed(2)}_${startStr}_${endStr}`;
 
-        panel.innerHTML = `<p class="helper-hint">Se descarcă datele meteo și de umiditate a solului de la sateliții NASA pentru ${cell.county}...</p>`;
-        fetchBadge.textContent = "Se încarcă...";
+        panel.innerHTML = `<p class="helper-hint">Downloading weather and soil moisture data from NASA satellites for ${cell.county}...</p>`;
+        fetchBadge.textContent = "Loading...";
 
         try {
             let data;
@@ -1018,8 +1283,6 @@
             let sumGwet = 0;
             let validDays = 0;
             let heatStressDays = 0;
-            const monthlyMap = {};
-
             dates.forEach(dt => {
                 const precip = p.PRECTOTCORR[dt];
                 const tmax = p.T2M_MAX[dt];
@@ -1039,11 +1302,6 @@
                     if (gwet > -900) sumGwet += gwet;
                     if (tmax >= 32) heatStressDays++;
                     validDays++;
-
-                    const ym = `${dt.slice(0, 4)}-${dt.slice(4, 6)}`;
-                    if (!monthlyMap[ym]) monthlyMap[ym] = { precip: 0, et0: 0 };
-                    monthlyMap[ym].precip += precip;
-                    monthlyMap[ym].et0 += et0;
                 }
             });
 
@@ -1062,13 +1320,13 @@
             let verdictText = "";
             if (deficitDelta > 80 || (avgRootMoisture !== "N/A" && Number(avgRootMoisture) < 42)) {
                 bannerClass = "alert";
-                verdictText = `⚠️ RISC MARE DE SECETĂ: În ultimele 12 luni au căzut doar ${precipTotalInt} l/m² de ploaie, iar solul are doar ${avgRootMoisture}% umiditate la rădăcină. Lipsa de apă este cu ${deficitDelta} mm mai severă decât media normală a zonei.`;
+                verdictText = `⚠️ HIGH DROUGHT RISK: Only ${precipTotalInt} l/m² of rain fell in the last 12 months, and the soil has only ${avgRootMoisture}% root-zone moisture. Water shortage is ${deficitDelta} mm more severe than the area's normal average.`;
             } else if (deficitDelta > 15) {
                 bannerClass = "warn";
-                verdictText = `⚡ ATENȚIE LA UMIDITATE: Deficitul real de apă (${realWaterDeficit} mm) este ușor peste normalul zonei (${gaezWde} mm). Recomandăm culturi rezistente la secetă și păstrarea apei în sol.`;
+                verdictText = `⚡ MOISTURE ALERT: The actual water deficit (${realWaterDeficit} mm) is slightly above the area's normal level (${gaezWde} mm). We recommend drought-resistant crops and water conservation practices.`;
             } else {
                 bannerClass = "ok";
-                verdictText = `✅ REZERVĂ BUNĂ DE APĂ: Ploile din ultimele 12 luni (${precipTotalInt} mm) și umiditatea din sol (${avgRootMoisture}%) sunt în limite normale pentru această zonă.`;
+                verdictText = `✅ GOOD WATER RESERVE: Rainfall over the last 12 months (${precipTotalInt} mm) and soil moisture (${avgRootMoisture}%) are within the normal range for this area.`;
             }
 
             lastNasaAnalysis = {
@@ -1085,30 +1343,20 @@
             };
 
             statusPill.classList.remove('offline');
-            statusText.textContent = 'Sateliți NASA: Conectat';
-            fetchBadge.textContent = `${validDays} zile analizate`;
+            statusText.textContent = 'Weather data: Connected';
+            fetchBadge.textContent = `${validDays} days analyzed`;
 
             panel.innerHTML = `
                 <div class="nasa-grid">
                     <div class="nasa-metric">
-                        <div class="nasa-metric-label">Ploi totale (12 luni)</div>
+                        <div class="nasa-metric-label">Total Rainfall (12 months)</div>
                         <div class="nasa-metric-val">${precipTotalInt} l/m²</div>
-                        <div class="nasa-metric-sub">Măsurat de sateliții NASA</div>
+                        <div class="nasa-metric-sub">Measured by NASA satellites</div>
                     </div>
                     <div class="nasa-metric">
-                        <div class="nasa-metric-label">Apă în sol (la rădăcină)</div>
-                        <div class="nasa-metric-val">${avgRootMoisture}%</div>
-                        <div class="nasa-metric-sub">Umiditate radiculară</div>
-                    </div>
-                    <div class="nasa-metric">
-                        <div class="nasa-metric-label">Deficit apă real vs. normal</div>
-                        <div class="nasa-metric-val" style="color:${deficitDelta > 50 ? '#f87171' : '#38bdf8'}">${realWaterDeficit} vs ${gaezWde} mm</div>
-                        <div class="nasa-metric-sub">Diferență: ${deficitDelta >= 0 ? '+' : ''}${deficitDelta} mm</div>
-                    </div>
-                    <div class="nasa-metric">
-                        <div class="nasa-metric-label">Zile de arșiță (≥32°C)</div>
-                        <div class="nasa-metric-val">${heatStressDays} zile</div>
-                        <div class="nasa-metric-sub">Temp. max medie: ${avgTmax}°C</div>
+                        <div class="nasa-metric-label">Hot Days (≥32°C)</div>
+                        <div class="nasa-metric-val">${heatStressDays} days</div>
+                        <div class="nasa-metric-sub">Average max. temperature: ${avgTmax}°C</div>
                     </div>
                 </div>
                 <div class="comparison-banner ${bannerClass}">
@@ -1116,17 +1364,15 @@
                 </div>
             `;
 
-            renderNasaTimeSeriesChart(monthlyMap);
-
             if (document.getElementById('autoAiOnClick') && document.getElementById('autoAiOnClick').checked) {
                 askLocalAi();
             }
 
         } catch (err) {
             statusPill.classList.add('offline');
-            statusText.textContent = 'Sateliți NASA: Offline';
-            fetchBadge.textContent = 'Indisponibil';
-            panel.innerHTML = `<p style="color:#fca5a5; font-size:0.78rem;">Nu s-au putut descărca datele meteo NASA (${err.message}). Verifică conexiunea la internet.</p>`;
+            statusText.textContent = 'Weather data: Offline';
+            fetchBadge.textContent = 'Unavailable';
+            panel.innerHTML = `<p style="color:#fca5a5; font-size:0.78rem;">NASA weather data could not be downloaded (${err.message}). Check your internet connection.</p>`;
             lastNasaAnalysis = null;
             if (document.getElementById('autoAiOnClick') && document.getElementById('autoAiOnClick').checked) {
                 askLocalAi();
@@ -1134,75 +1380,45 @@
         }
     }
 
-    function renderNasaTimeSeriesChart(monthlyMap) {
-        const ctx = document.getElementById('nasaTimeSeriesChart').getContext('2d');
-        if (nasaChartInstance) nasaChartInstance.destroy();
-
-        const labels = Object.keys(monthlyMap).sort();
-        const precipSeries = labels.map(k => Math.round(monthlyMap[k].precip));
-        const et0Series = labels.map(k => Math.round(monthlyMap[k].et0));
-
-        nasaChartInstance = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels.map(l => l.slice(2)),
-                datasets: [
-                    {
-                        label: 'Ploi (mm)',
-                        data: precipSeries,
-                        backgroundColor: '#38bdf8',
-                        borderRadius: 4
-                    },
-                    {
-                        label: 'Apă evaporată (mm)',
-                        data: et0Series,
-                        type: 'line',
-                        borderColor: '#f59e0b',
-                        backgroundColor: 'rgba(245, 158, 11, 0.15)',
-                        borderWidth: 2,
-                        tension: 0.35,
-                        pointRadius: 2.5
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: true,
-                        labels: { color: '#cbd5e1', font: { size: 10 }, boxWidth: 12 }
-                    }
-                },
-                scales: {
-                    x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 9 } } },
-                    y: { grid: { color: 'rgba(148,163,184,0.1)' }, ticks: { color: '#94a3b8', font: { size: 9 } } }
-                }
-            }
-        });
-    }
-
-    function selectAndAnalyzeCell(cell) {
+    async function selectAndAnalyzeCell(cell) {
         selectedCell = cell;
         const cropKey = document.getElementById('cropSelect').value;
         const mgmtKey = document.getElementById('mgmtSelect').value;
-        const metrics = computeCellMetrics(cell, cropKey, mgmtKey);
+        const gaezPill = document.getElementById('gaezStatusPill');
+        const gaezText = document.getElementById('gaezStatusText');
 
-        inspectCell(cell, metrics);
-        fetchNasaPowerForCell(cell, metrics);
+        // 1. Immediately display baseline metrics while querying live FAO GAEZ v4 rasters
+        const initialMetrics = computeCellMetrics(cell, cropKey, mgmtKey);
+        inspectCell(cell, initialMetrics, true);
+
+        gaezPill.classList.remove('offline');
+        gaezText.textContent = 'Field data: Checking...';
+
+        // 2. Fetch live pixel values from FAO GAEZ v4 (RES05 + RES02: SIX, YLX, WDE, CBD, CYL, FC2, FC1)
+        const liveRes = await fetchLiveGaezForCell(cell, cropKey, mgmtKey);
+        const updatedMetrics = computeCellMetrics(cell, cropKey, mgmtKey);
+
+        if (liveRes.liveHits > 0) {
+            gaezPill.classList.remove('offline');
+            gaezText.textContent = `Field data: Connected (${liveRes.liveHits}/7)`;
+        } else {
+            gaezPill.classList.add('offline');
+            gaezText.textContent = 'Field data: Estimated';
+        }
+
+        // 3. Re-render cell card & map colors with the live GAEZ values, then fetch NASA POWER weather
+        inspectCell(cell, updatedMetrics, false);
+        renderDashboard(false);
+        fetchNasaPowerForCell(cell, updatedMetrics);
     }
 
-    function renderDashboard() {
+    function renderDashboard(allowAutoSelect = true) {
         const selectedCounty = document.getElementById('countySelect').value;
         const indicator = document.getElementById('indicatorSelect').value;
         const cropKey = document.getElementById('cropSelect').value;
         const mgmtKey = document.getElementById('mgmtSelect').value;
-        const nasaLayerKey = document.getElementById('nasaLayerSelect').value;
-        const opacity = document.getElementById('opacityRange').value / 100;
-
-        document.getElementById('opacityVal').textContent = `${Math.round(opacity * 100)}%`;
+        const opacity = 0.72;
         updateLegend(indicator, cropKey);
-        updateNasaGibsLayer(nasaLayerKey, opacity);
 
         rasterLayerGroup.clearLayers();
 
@@ -1210,33 +1426,24 @@
             ? gridCells
             : gridCells.filter(c => c.county === selectedCounty);
 
-        let sumVal = 0;
-        let maxVal = -Infinity;
-        let maxCounty = '';
-
         filteredCells.forEach(cell => {
             const metrics = computeCellMetrics(cell, cropKey, mgmtKey);
-            const val = indicator === 'SIX' ? metrics.six : (indicator === 'YLX' ? metrics.ylx : metrics.wde);
-
-            sumVal += val;
-            if (val > maxVal) {
-                maxVal = val;
-                maxCounty = cell.county;
-            }
+            const val = getMetricValue(metrics, indicator);
 
             const isSelected = selectedCell && selectedCell.id === cell.id;
-            const effectiveFillOpacity = nasaLayerKey !== 'NONE' ? opacity * 0.55 : opacity;
             const rect = L.rectangle(cell.bounds, {
                 color: isSelected ? '#ffffff' : 'rgba(15, 23, 42, 0.55)',
                 weight: isSelected ? 2.5 : 0.8,
                 fillColor: getColor(val, indicator, cropKey),
-                fillOpacity: effectiveFillOpacity
+                fillOpacity: opacity
             });
 
-            rect.bindTooltip(`<strong>Jud. ${cell.county}</strong> (${cell.id})<br>Producție est.: <b>${(metrics.ylx/1000).toFixed(2)} t/ha</b><br>Click pentru plan 4 ani`, {
-                direction: 'top',
-                opacity: 0.95
-            });
+            rect.bindTooltip(
+                `<strong>County ${cell.county}</strong> (${cell.id}) ${metrics.isLiveGaez ? '🟢 Live data' : ''}<br>` +
+                `Expected harvest: <b>${(metrics.ylx / 1000).toFixed(2)} t/ha</b> • Sowing: <b>Day ${metrics.cbd}</b> (${metrics.cyl}d)<br>` +
+                `Water stress: <b>${metrics.fc2.toFixed(2)}</b> • Heat stress: <b>${metrics.fc1.toFixed(2)}</b>`,
+                { direction: 'top', opacity: 0.95 }
+            );
 
             rect.on('mouseover', function() {
                 if (!selectedCell || selectedCell.id !== cell.id) {
@@ -1250,38 +1457,27 @@
             });
             rect.on('click', function() {
                 selectAndAnalyzeCell(cell);
-                renderDashboard();
             });
 
             rect.addTo(rasterLayerGroup);
         });
 
-        const avgVal = filteredCells.length ? Math.round(sumVal / filteredCells.length) : 0;
-        document.getElementById('kpiAvg').textContent = avgVal.toLocaleString();
-        document.getElementById('kpiMax').textContent = maxVal > -Infinity ? maxVal.toLocaleString() : '—';
-        document.getElementById('kpiMaxCounty').textContent = maxCounty ? `Jud. ${maxCounty}` : '—';
-        document.getElementById('kpiCount').textContent = filteredCells.length;
-
-        const unitMap = { SIX: 'puncte (0-10k)', YLX: 'kg/hectar', WDE: 'mm/an' };
-        document.getElementById('kpiUnit').textContent = unitMap[indicator];
-
-        const avgSix = filteredCells.reduce((acc, c) => acc + computeCellMetrics(c, cropKey, mgmtKey).six, 0) / (filteredCells.length || 1);
-        document.getElementById('kpiClass').textContent = avgSix >= 7500 ? 'Excelent (S1)' : (avgSix >= 5500 ? 'Bun (S2)' : 'Marginal (S3)');
-
-        if (filteredCells.length > 0 && (!selectedCell || (selectedCounty !== 'ALL' && selectedCell.county !== selectedCounty))) {
+        if (allowAutoSelect && filteredCells.length > 0 && (!selectedCell || (selectedCounty !== 'ALL' && selectedCell.county !== selectedCounty))) {
             const defaultCell = filteredCells.find(c => c.county === 'Călărași') || filteredCells[0];
             selectAndAnalyzeCell(defaultCell);
         } else if (selectedCell) {
-            inspectCell(selectedCell, computeCellMetrics(selectedCell, cropKey, mgmtKey));
+            inspectCell(selectedCell, computeCellMetrics(selectedCell, cropKey, mgmtKey), false);
         }
 
+        const isDecimalIndicator = (indicator === 'FC2' || indicator === 'FC1');
         const allCountyStats = Object.keys(COUNTIES).map(cName => {
             const cCells = gridCells.filter(c => c.county === cName);
-            const mean = cCells.reduce((acc, c) => {
+            const rawMean = cCells.reduce((acc, c) => {
                 const m = computeCellMetrics(c, cropKey, mgmtKey);
-                return acc + (indicator === 'SIX' ? m.six : (indicator === 'YLX' ? m.ylx : m.wde));
+                return acc + getMetricValue(m, indicator);
             }, 0) / cCells.length;
-            return { county: cName, mean: Math.round(mean) };
+            const mean = isDecimalIndicator ? Number(rawMean.toFixed(2)) : Math.round(rawMean);
+            return { county: cName, mean };
         }).sort((a, b) => b.mean - a.mean);
 
         renderChart(allCountyStats, selectedCounty);
@@ -1296,7 +1492,7 @@
             data: {
                 labels: stats.map(s => s.county),
                 datasets: [{
-                    label: 'Medie Județ',
+                    label: 'County Average',
                     data: stats.map(s => s.mean),
                     backgroundColor: stats.map(s => s.county === selectedCounty ? '#10b981' : '#38bdf8'),
                     borderRadius: 4
@@ -1335,13 +1531,17 @@
                 six: m.six,
                 ylx: m.ylx,
                 wde: m.wde,
+                cbd: m.cbd,
+                cyl: m.cyl,
+                fc2: m.fc2,
+                fc1: m.fc1,
                 faoClass: m.faoClass
             };
         }).sort((a, b) => b.six - a.six);
 
         const cropsSummaryText = allCropsRanking
-            .map((c, idx) => `${idx + 1}. ${c.name}: Scor teren=${c.six}/10000, Producție est.=${(c.ylx/1000).toFixed(2)} t/ha, Deficit apă=${c.wde} mm/an`)
-            .join('');
+            .map((c, idx) => `${idx + 1}. ${c.name}: Land score=${c.six}/10000, Estimated yield=${(c.ylx/1000).toFixed(2)} t/ha, Water deficit=${c.wde} mm/year, Sowing start (CBD)=Day ${c.cbd}, Cycle length (CYL)=${c.cyl} days, Water factor (FC2)=${c.fc2}, Thermal factor (FC1)=${c.fc1}`)
+            .join('\n');
 
         if (aiAbortController) {
             aiAbortController.abort();
@@ -1349,34 +1549,35 @@
         aiAbortController = new AbortController();
 
         button.disabled = true;
-        result.textContent = `⏳ Se calculează planul de rotație pe 4 ani pentru ${targetCell.id} (Jud. ${targetCell.county})...`;
+        result.textContent = `⏳ Calculating the 4-year crop rotation plan for ${targetCell.id} (County ${targetCell.county})...`;
 
         const nasaBlock = lastNasaAnalysis
-            ? `Date satelitare NASA (ultimele 12 luni pentru această parcelă din ${targetCell.county}):
-- Ploi totale în ultimele 12 luni: ${lastNasaAnalysis.precipTotalInt} mm (l/m²)
-- Deficit de apă real: ${lastNasaAnalysis.realWaterDeficit} mm vs. normalul zonei ${cellMetrics.wde} mm
-- Umiditatea solului la nivelul rădăcinilor: ${lastNasaAnalysis.avgRootMoisture}%
-- Zile cu arșiță (>=32°C): ${lastNasaAnalysis.heatStressDays} zile (temperatura maximă medie ${lastNasaAnalysis.avgTmax}°C)`
-            : `Date satelitare NASA indisponibile momentan; folosește indicatorii de sol și climă ai parcelei.`;
+            ? `NASA satellite data (last 12 months for this cell in ${targetCell.county}):
+- Total rainfall over the last 12 months: ${lastNasaAnalysis.precipTotalInt} mm (l/m²)
+- Actual water deficit: ${lastNasaAnalysis.realWaterDeficit} mm vs. the area's normal level of ${cellMetrics.wde} mm
+- Root-zone soil moisture: ${lastNasaAnalysis.avgRootMoisture}%
+- Hot days (>=32°C): ${lastNasaAnalysis.heatStressDays} days (average maximum temperature ${lastNasaAnalysis.avgTmax}°C)`
+            : `NASA satellite data is currently unavailable; use the cell's soil and climate indicators.`;
 
-        const prompt = `Ești un inginer agronom prietenos care sfătuiește un fermier din România pe înțelesul lui, fără jargon complicat.
-Parcela analizată: ${targetCell.id}, Județul ${targetCell.county} (${targetCell.lat}°N, ${targetCell.lng}°E).
-Mod de lucru ales de fermier: ${MGMT_PARAMS[mgmtKey].label}.
-Cultura verificată de fermier: ${crop.name} (producție estimată ${(cellMetrics.ylx/1000).toFixed(2)} tone/ha, scor ${cellMetrics.six}/10000).
+        const prompt = `You are a friendly agronomist advising a Romanian farmer in clear, simple language without complicated jargon.
+Analyzed cell: ${targetCell.id}, County ${targetCell.county} (${targetCell.lat}°N, ${targetCell.lng}°E).
+Data source status: ${cellMetrics.isLiveGaez ? 'Live FAO GAEZ v4 rasters' : 'Calibrated GAEZ regional baseline'}.
+Farmer's selected management method: ${MGMT_PARAMS[mgmtKey].label}.
+Selected crop: ${crop.name} (estimated yield ${(cellMetrics.ylx/1000).toFixed(2)} tons/ha, score ${cellMetrics.six}/10000, sowing day ${cellMetrics.cbd}, cycle duration ${cellMetrics.cyl} days, water limitation factor FC2=${cellMetrics.fc2}, temperature limitation factor FC1=${cellMetrics.fc1}).
 
-Clasamentul celor mai potrivite culturi pentru acest teren:
+Ranking of the most suitable crops for this land:
 ${cropsSummaryText}
 
 ${nasaBlock}
 
-Scrie un răspuns clar, prietenos și direct pentru fermier, structurat astfel:
-1. **Recomandarea principală pentru terenul tău:** Spune-i clar dacă ${crop.name} este o alegere bună aici sau ce altă cultură i-ar aduce o recoltă mai sigură ținând cont de umiditatea din sol.
-2. **Plan de Rotație pe 4 Ani (Asolament recomandat):** Propune o succesiune logică pe 4 ani (alternând cereale păioase, prășitoare și leguminoase/oleaginoase ca să protejeze solul și apa):
-   - **Anul 1:** [Cultură + de ce se potrivește acum]
-   - **Anul 2:** [Cultură + beneficiul pentru sol/apă]
-   - **Anul 3:** [Cultură + beneficiul]
-   - **Anul 4:** [Cultură + beneficiul]
-3. **Sfat practic pentru ferma ta:** O recomandare concretă pentru economisirea apei în sol (ex. lucrări minime/no-till, culturi verzi de acoperire sau eficiența irigării).`;
+Write a clear, friendly, direct answer for the farmer, structured as follows:
+1. **Main recommendation for this land:** Clearly say whether ${crop.name} is a good choice here or which other crop would provide a safer harvest considering soil moisture and GAEZ water/thermal limitation factors.
+2. **4-Year Crop Rotation Plan:** Propose a logical 4-year sequence (alternating cereals, row crops, and legumes/oilseeds to protect the soil and water, accounting for sowing dates and cycle durations):
+   - **Year 1:** [Crop + why it fits now]
+   - **Year 2:** [Crop + soil/water benefit]
+   - **Year 3:** [Crop + benefit]
+   - **Year 4:** [Crop + benefit]
+3. **Practical advice for the farm:** A concrete recommendation for conserving soil water (e.g. minimum/no-till practices, cover crops, or irrigation efficiency).`;
 
         try {
             const response = await fetch('http://localhost:11434/api/generate', {
@@ -1391,33 +1592,32 @@ Scrie un răspuns clar, prietenos și direct pentru fermier, structurat astfel:
                 })
             });
             if (!response.ok) {
-                throw new Error(`Ollama a răspuns cu HTTP ${response.status}`);
+                throw new Error(`Ollama returned HTTP ${response.status}`);
             }
             const data = await response.json();
             if (!data.response) {
-                throw new Error('Ollama nu a returnat un răspuns.');
+                throw new Error('Ollama did not return a response.');
             }
             result.textContent = data.response.trim();
         } catch (error) {
             if (error.name === 'AbortError') return;
-            result.textContent = `⚠️ Asistentul AI local (Ollama) nu este pornit momentan (${error.message}).
+            result.textContent = `⚠️ The local AI assistant (Ollama) is not running (${error.message}).
 
-Pentru a-l porni pe calculatorul tău, deschide PowerShell și rulează:
+To start it on your computer, open PowerShell and run:
 ollama serve
 ollama pull qwen2.5:3b
 
-Între timp, iată top 3 cele mai bune culturi calculate matematic pentru această parcelă:
-1. ${allCropsRanking[0].name} (~${(allCropsRanking[0].ylx/1000).toFixed(2)} t/ha)
-2. ${allCropsRanking[1].name} (~${(allCropsRanking[1].ylx/1000).toFixed(2)} t/ha)
-3. ${allCropsRanking[2].name} (~${(allCropsRanking[2].ylx/1000).toFixed(2)} t/ha)`;
+Meanwhile, here are the top 3 crops calculated for this cell:
+1. ${allCropsRanking[0].name} (~${(allCropsRanking[0].ylx/1000).toFixed(2)} t/ha • Sowing Day ${allCropsRanking[0].cbd}, ${allCropsRanking[0].cyl}d)
+2. ${allCropsRanking[1].name} (~${(allCropsRanking[1].ylx/1000).toFixed(2)} t/ha • Sowing Day ${allCropsRanking[1].cbd}, ${allCropsRanking[1].cyl}d)
+3. ${allCropsRanking[2].name} (~${(allCropsRanking[2].ylx/1000).toFixed(2)} t/ha • Sowing Day ${allCropsRanking[2].cbd}, ${allCropsRanking[2].cyl}d)`;
         } finally {
             button.disabled = false;
         }
     }
 
-    ['countySelect', 'indicatorSelect', 'cropSelect', 'mgmtSelect', 'nasaLayerSelect'].forEach(id => {
+    ['countySelect', 'indicatorSelect', 'cropSelect', 'mgmtSelect'].forEach(id => {
         document.getElementById(id).addEventListener('change', () => {
-            renderDashboard();
             if (id === 'countySelect') {
                 const val = document.getElementById('countySelect').value;
                 if (val !== 'ALL' && COUNTIES[val]) {
@@ -1425,22 +1625,21 @@ ollama pull qwen2.5:3b
                 } else {
                     map.flyTo([44.52, 26.55], 8, { duration: 0.8 });
                 }
-            }
-            if ((id === 'cropSelect' || id === 'mgmtSelect') && selectedCell) {
-                const cropKey = document.getElementById('cropSelect').value;
-                const mgmtKey = document.getElementById('mgmtSelect').value;
-                fetchNasaPowerForCell(selectedCell, computeCellMetrics(selectedCell, cropKey, mgmtKey));
+                renderDashboard(true);
+            } else if ((id === 'cropSelect' || id === 'mgmtSelect') && selectedCell) {
+                selectAndAnalyzeCell(selectedCell);
+            } else {
+                renderDashboard(false);
             }
         });
     });
 
-    document.getElementById('opacityRange').addEventListener('input', renderDashboard);
     document.getElementById('askAiBtn').addEventListener('click', askLocalAi);
 
     document.getElementById('resetViewBtn').addEventListener('click', () => {
         document.getElementById('countySelect').value = 'ALL';
         map.flyTo([44.52, 26.55], 8, { duration: 0.8 });
-        renderDashboard();
+        renderDashboard(true);
     });
 
     document.getElementById('exportCsvBtn').addEventListener('click', () => {
@@ -1452,7 +1651,13 @@ ollama pull qwen2.5:3b
             ? gridCells
             : gridCells.filter(c => c.county === selectedCounty);
 
-        const headers = ['Parcela_ID', 'Judet', 'Latitudine', 'Longitudine', 'Cultura', 'Mod_Lucru', 'Scor_Teren', 'Productie_Est_kg_ha', 'Deficit_Apa_mm', 'Calificare'];
+        const headers = [
+            'Cell_ID', 'County', 'Latitude', 'Longitude', 'Crop', 'Management',
+            'Data_Source', 'Land_Score_SIX', 'Estimated_Yield_kg_ha_YLX', 'Water_Deficit_mm_WDE',
+            'RES02_CBD_Sowing_Day', 'RES02_CYL_Cycle_Days',
+            'RES02_FC2_Water_Limitation', 'RES02_FC1_Temp_Limitation',
+            'Classification'
+        ];
         const rows = filteredCells.map(cell => {
             const m = computeCellMetrics(cell, cropKey, mgmtKey);
             return [
@@ -1462,9 +1667,14 @@ ollama pull qwen2.5:3b
                 cell.lng,
                 `"${CROP_PARAMS[cropKey].name}"`,
                 `"${MGMT_PARAMS[mgmtKey].label}"`,
+                `"${m.isLiveGaez ? 'FAO_GAEZ_v4_Live' : 'GAEZ_Calibrated_Model'}"`,
                 m.six,
                 m.ylx,
                 m.wde,
+                m.cbd,
+                m.cyl,
+                m.fc2.toFixed(2),
+                m.fc1.toFixed(2),
                 `"${m.faoClass}"`
             ].join(',');
         });
@@ -1474,12 +1684,12 @@ ollama pull qwen2.5:3b
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `Raport_AgroSense_${selectedCounty}_${cropKey}.csv`;
+        a.download = `AgroSense_Report_${selectedCounty}_${cropKey}.csv`;
         a.click();
         URL.revokeObjectURL(url);
     });
 
-    renderDashboard();
+    renderDashboard(true);
 </script>
 </body>
 </html>

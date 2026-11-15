@@ -8,3 +8,12 @@ __pycache__/
 
 # Local generated data
 data/
+
+
+index_fermier_simplu.html
+index_responsive_fermier.html
+map_service.py
+index_fermier_simplu-v2.html
+data_service.py
+extract_romania.py
+app.py

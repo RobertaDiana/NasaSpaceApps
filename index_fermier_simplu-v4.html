@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ro">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AgroSense — Ce pot să fac cu terenul meu?</title>
+    <title>AgroSense — What can I do with my land?</title>
     <!-- Leaflet JS (Open-Source BSD-2-Clause) -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <!-- Google Fonts -->
@@ -165,7 +165,7 @@
             }
         }
 
-        /* Step 1 Sidebar: "Am terenul acesta, ce pot face cu el?" */
+        /* Step 1 Sidebar: "I have this land, what can I do with it?" */
         .hero-question-box {
             background: linear-gradient(135deg, rgba(16, 185, 129, 0.16), rgba(2, 132, 199, 0.12));
             border: 1px solid rgba(16, 185, 129, 0.35);
@@ -306,7 +306,7 @@
             flex-shrink: 0;
         }
 
-        /* Right Panel: Direct Answer to "Ce pot să fac cu acest teren?" */
+        /* Right Panel: Direct answer to "What can I do with this land?" */
         .card-section {
             background-color: #0f172a;
             border: 1px solid var(--border);
@@ -335,7 +335,7 @@
         }
 
 
-        /* Sort/Filter Bar inside "Ce poți face cu acest teren" */
+        /* Sort/filter bar inside "What can I do with this land?" */
         .sort-filter-wrapper {
             margin-top: 10px;
             display: flex;
@@ -750,13 +750,13 @@
     <div class="brand">
         <div class="brand-logo">🌱</div>
         <div class="brand-text">
-            <h1>AgroSense Fermier</h1>
-            <p>„Am acest teren — ce pot să fac cu el?”</p>
+            <h1>AgroSense Farmer</h1>
+            <p>"I have this land — what can I do with it?"</p>
         </div>
     </div>
     <div class="header-actions">
-        <button class="btn btn-desktop-only" id="resetViewBtn">🗺️ Toată zona</button>
-        <button class="btn btn-primary btn-desktop-only" id="exportCsvBtn">📥 Descarcă tabel</button>
+        <button class="btn btn-desktop-only" id="resetViewBtn">🗺️ Full area</button>
+        <button class="btn btn-primary btn-desktop-only" id="exportCsvBtn">📥 Download table</button>
     </div>
 </header>
 
@@ -764,16 +764,16 @@
     <!-- Left Sidebar: Find Your Land First -->
     <aside class="sidebar">
         <div class="hero-question-box">
-            <h2>👋 Arată-ne unde ai terenul</h2>
-            <p>Găsește-ți parcela pe hartă sau folosește localizarea telefonului, iar noi îți spunem imediat ce culturi merg cel mai bine acolo.</p>
-            <button type="button" class="btn btn-gps" id="locateMeBtn">📍 Găsește terenul meu (GPS)</button>
+            <h2>👋 Show us where your land is</h2>
+            <p>Find your field on the map or use your phone's location, and we will immediately show you which crops work best there.</p>
+            <button type="button" class="btn btn-gps" id="locateMeBtn">📍 Find my land (GPS)</button>
             <div id="gpsFeedback" class="helper-hint" style="margin-top:6px; display:none;"></div>
         </div>
 
         <div class="control-group">
-            <label for="countySelect">Sau alege județul tău:</label>
+            <label for="countySelect">Or choose your county:</label>
             <select id="countySelect">
-                <option value="ALL">Toate județele (Sud și Sud-Est)</option>
+                <option value="ALL">All counties (South and South-East)</option>
                 <option value="Călărași">Călărași</option>
                 <option value="Ialomița">Ialomița</option>
                 <option value="Constanța">Constanța</option>
@@ -789,29 +789,29 @@
         </div>
 
         <div class="control-group">
-            <label>Ai apă / irigații pe acest teren?</label>
+            <label>Do you have water / irrigation on this land?</label>
             <div class="choice-grid" id="waterChoiceGrid">
                 <button type="button" class="choice-btn active" data-water="R">
-                    <span>☁️ Nu, doar din ploi</span>
-                    <span class="sub">Teren neirigat</span>
+                    <span>☁️ No, rainfed only</span>
+                    <span class="sub">Non-irrigated land</span>
                 </button>
                 <button type="button" class="choice-btn" data-water="I">
-                    <span>💧 Da, pot iriga</span>
-                    <span class="sub">Cu sistem de irigații</span>
+                    <span>💧 Yes, I can irrigate</span>
+                    <span class="sub">With an irrigation system</span>
                 </button>
             </div>
         </div>
 
         <div class="control-group">
-            <label>Ce buget de lucrări ai?</label>
+            <label>What is your farming budget?</label>
             <div class="choice-grid" id="inputChoiceGrid">
                 <button type="button" class="choice-btn active" data-input="H">
-                    <span>🚜 Îngrijire completă</span>
-                    <span class="sub">Îngrășăminte & tratamente</span>
+                    <span>🚜 Full care</span>
+                    <span class="sub">Fertilizers & treatments</span>
                 </button>
                 <button type="button" class="choice-btn" data-input="L">
-                    <span>🌱 Buget redus</span>
-                    <span class="sub">Cheltuieli minime</span>
+                    <span>🌱 Reduced budget</span>
+                    <span class="sub">Minimum expenses</span>
                 </button>
             </div>
         </div>
@@ -819,31 +819,31 @@
 
     <!-- Interactive Map -->
     <main class="map-wrapper">
-        <div class="map-floating-tip">👆 Apasă pe pătratul unde este pământul tău</div>
+        <div class="map-floating-tip">👆 Click the square where your land is</div>
         <div id="map"></div>
         <div class="legend-box">
-            <div class="legend-title" id="legendTitle">Cât de roditor e terenul</div>
+            <div class="legend-title" id="legendTitle">How fertile is the land?</div>
             <div class="legend-scale" id="legendScale"></div>
         </div>
     </main>
 
-    <!-- Right / Mobile Panel: Direct Answer to "Am acest teren, ce pot face cu el?" -->
+    <!-- Right / Mobile Panel: Direct answer to "I have this land, what can I do with it?" -->
     <aside class="right-panel">
         <!-- 1. Main Answer: Best Things You Can Do With This Land -->
         <div class="card-section">
             <div class="panel-section-title">
-                <span>🌾 Ce poți face cu acest teren</span>
-                <span class="tag-mini" id="activeCellBadge">Niciun teren ales</span>
+                <span>🌾 What can you do with this land?</span>
+                <span class="tag-mini" id="activeCellBadge">No land selected</span>
             </div>
-            <p class="helper-hint" id="landIntroText">Apasă pe un pătrat de pe hartă ca să vezi ce culturi merg cel mai bine pe pământul tău.</p>
+            <p class="helper-hint" id="landIntroText">Click a square on the map to see which crops work best on your land.</p>
             
             <div class="sort-filter-wrapper">
-                <div class="sort-filter-label">Ordonează / filtrează variantele după:</div>
+                <div class="sort-filter-label">Sort / filter options by:</div>
                 <div class="sort-pills" id="cropRankFilterGroup">
-                    <button type="button" class="sort-pill-btn active" data-rank="SIX">⭐ Indice pretabilitate</button>
-                    <button type="button" class="sort-pill-btn" data-rank="YLX">⚖️ Producție (tone/ha)</button>
-                    <button type="button" class="sort-pill-btn" data-rank="FC2">💧 Factor limitativ apă</button>
-                    <button type="button" class="sort-pill-btn" data-rank="FC1">🌡️ Factor limitativ termic</button>
+                    <button type="button" class="sort-pill-btn active" data-rank="SIX">⭐ Suitability index</button>
+                    <button type="button" class="sort-pill-btn" data-rank="YLX">⚖️ Yield (tons/ha)</button>
+                    <button type="button" class="sort-pill-btn" data-rank="FC2">💧 Water limitation</button>
+                    <button type="button" class="sort-pill-btn" data-rank="FC1">🌡️ Heat limitation</button>
                 </div>
             </div>
 
@@ -853,31 +853,31 @@
         <!-- 2. 4-Year Plan so the Soil Stays Healthy -->
         <div class="ai-highlight-card">
             <div class="panel-section-title">
-                <span>📅 Cum să rotești culturile (Plan pe 4 ani)</span>
+                <span>📅 How to rotate crops (4-year plan)</span>
                 <label style="font-size:0.74rem; color:#94a3b8; display:flex; align-items:center; gap:5px; cursor:pointer;">
-                    <input type="checkbox" id="autoAiOnClick" checked style="accent-color:#10b981; width:16px; height:16px;"> Automat
+                    <input type="checkbox" id="autoAiOnClick" checked style="accent-color:#10b981; width:16px; height:16px;"> Automatic
                 </label>
             </div>
-            <p class="helper-hint">Dacă pui aceeași cultură an de an, scade producția. Iată ordinea recomandată pentru terenul tău:</p>
-            <button class="btn btn-primary" id="askAiBtn" style="width:100%; margin-top:10px;">✨ Calculează planul pe 4 ani</button>
-            <div class="ai-result" id="aiResult">Alege terenul pe hartă pentru a primi planul pe 4 ani...</div>
+            <p class="helper-hint">Growing the same crop every year reduces yield. Here is the recommended order for your land:</p>
+            <button class="btn btn-primary" id="askAiBtn" style="width:100%; margin-top:10px;">✨ Calculate the 4-year plan</button>
+            <div class="ai-result" id="aiResult">Choose a field on the map to receive the 4-year plan...</div>
         </div>
 
         <!-- 3. Check Any Specific Crop on This Land -->
         <div class="card-section">
             <div class="panel-section-title">
-                <span>🔍 Verifică o cultură anume</span>
+                <span>🔍 Check a specific crop</span>
             </div>
             <div class="control-group">
                 <select id="cropSelect">
-                    <option value="maize">🌽 Porumb boabe</option>
-                    <option value="wheat">🌾 Grâu de toamnă</option>
-                    <option value="sunflower">🌻 Floarea-soarelui</option>
-                    <option value="soybean">🫘 Soia</option>
-                    <option value="alfalfa">🌿 Lucernă</option>
-                    <option value="barley">🌾 Orz</option>
-                    <option value="rapeseed">🌼 Rapiță</option>
-                    <option value="potato">🥔 Cartof</option>
+                    <option value="maize">🌽 Grain maize</option>
+                    <option value="wheat">🌾 Winter wheat</option>
+                    <option value="sunflower">🌻 Sunflower</option>
+                    <option value="soybean">🫘 Soybean</option>
+                    <option value="alfalfa">🌿 Alfalfa</option>
+                    <option value="barley">🌾 Barley</option>
+                    <option value="rapeseed">🌼 Rapeseed</option>
+                    <option value="potato">🥔 Potato</option>
                 </select>
             </div>
             <div id="specificCropVerdict"></div>
@@ -886,40 +886,40 @@
         <!-- 4. Specific Climatic Data & Crop-Interval Charts -->
         <div class="card-section">
             <div class="panel-section-title">
-                <span>🌦️ Date climatice specifice</span>
+                <span>🌦️ Climate data for this field</span>
                 <span class="tag-mini" id="nasaFetchBadge">NASA POWER</span>
             </div>
-            <p class="helper-hint" id="climateSubtitleHint">Indicatori climatici pe ultimele 12 luni și evoluția zilnică în perioada de vegetație a culturii selectate.</p>
+            <p class="helper-hint" id="climateSubtitleHint">Climate indicators for the last 12 months and daily trends during the selected crop's growing season.</p>
             <div id="nasaPanelContent">
-                <p class="helper-hint" style="margin-top:8px;">Verificăm datele climatice din zona terenului tău...</p>
+                <p class="helper-hint" style="margin-top:8px;">Checking climate data for your field...</p>
             </div>
         </div>
 
         <!-- 5. Hidden Technical Details for Advanced Users -->
         <details class="tech-details">
             <summary>
-                <span>⚙️ Date tehnice avansate și grafic județe (opțional)</span>
+                <span>⚙️ Advanced technical data and county chart (optional)</span>
                 <span>▼</span>
             </summary>
             <div class="tech-content">
                 <div class="control-group">
-                    <label for="indicatorSelect">Colorare hartă după indicator:</label>
+                    <label for="indicatorSelect">Color the map by indicator:</label>
                     <select id="indicatorSelect">
-                        <option value="SIX">Calitatea terenului (Scor FAO)</option>
-                        <option value="YLX">Producția estimată (kg/ha)</option>
-                        <option value="WDE">Deficit de apă (mm/an)</option>
-                        <option value="CBD">Ziua optimă de semănat</option>
-                        <option value="CYL">Durata ciclului (zile)</option>
-                        <option value="FC2">Limitare din apă (FC2)</option>
-                        <option value="FC1">Limitare din căldură (FC1)</option>
+                        <option value="SIX">Land quality (FAO score)</option>
+                        <option value="YLX">Estimated yield (kg/ha)</option>
+                        <option value="WDE">Water deficit (mm/year)</option>
+                        <option value="CBD">Optimal sowing day</option>
+                        <option value="CYL">Growing cycle length (days)</option>
+                        <option value="FC2">Water limitation (FC2)</option>
+                        <option value="FC1">Heat limitation (FC1)</option>
                     </select>
                 </div>
 
                 <div id="technicalMetricsList"></div>
 
                 <div style="display:flex; gap:8px; margin-top:4px;">
-                    <button class="btn" id="mobileResetBtn" style="flex:1;">🗺️ Toată zona</button>
-                    <button class="btn btn-primary" id="mobileExportBtn" style="flex:1;">📥 Descarcă CSV</button>
+                    <button class="btn" id="mobileResetBtn" style="flex:1;">🗺️ Full area</button>
+                    <button class="btn btn-primary" id="mobileExportBtn" style="flex:1;">📥 Download CSV</button>
                 </div>
 
                 <div class="chart-container">
@@ -931,14 +931,14 @@
 </div>
 
 <!-- Mobile Bottom Navigation -->
-<nav class="mobile-nav" aria-label="Meniu telefon">
+<nav class="mobile-nav" aria-label="Mobile menu">
     <button type="button" class="mobile-nav-btn active" id="navMapBtn">
         <span class="nav-icon">🗺️</span>
-        <span>1. Terenul meu</span>
+        <span>1. My land</span>
     </button>
     <button type="button" class="mobile-nav-btn" id="navAdviceBtn">
         <span class="nav-icon">🌾</span>
-        <span>2. Ce pot face cu el</span>
+        <span>2. What can I do with it?</span>
     </button>
 </nav>
 
@@ -1133,21 +1133,21 @@
     // CROPS WITH PRACTICAL ROMANIAN FARMER ADVICE
     // =========================================================================
     const CROP_PARAMS = {
-        maize:     { code: "maiz", emoji: "🌽", name: "Porumb boabe", role: "Cultură de bază (prășitoare)", tip: "Aduce producție mare, dar cere apă vara.", baseSix: 6800, maxYield: 11800, waterNeed: 410, baseCbd: 108, baseCyl: 138, waterSens: 0.34, thermBase: 0.91 },
-        wheat:     { code: "whea", emoji: "🌾", name: "Grâu de toamnă", role: "Cultură sigură (păioasă)", tip: "Folosește bine ploile din toamnă-primăvară și scapă de arșița din iulie.", baseSix: 7400, maxYield: 8600, waterNeed: 290, baseCbd: 282, baseCyl: 268, waterSens: 0.18, thermBase: 0.94 },
-        sunflower: { code: "sunf", emoji: "🌻", name: "Floarea-soarelui", role: "Rezistentă la secetă", tip: "Rădăcina adâncă caută apa din sol; bună în zone mai uscate.", baseSix: 7200, maxYield: 4200, waterNeed: 320, baseCbd: 102, baseCyl: 128, waterSens: 0.22, thermBase: 0.93 },
-        soybean:   { code: "soyb", emoji: "🫘", name: "Soia", role: "Îmbogățește pământul", tip: "Lasă azot natural în sol pentru cultura următoare; preferă teren irigat.", baseSix: 6100, maxYield: 4100, waterNeed: 440, baseCbd: 115, baseCyl: 132, waterSens: 0.38, thermBase: 0.89 },
-        alfalfa:   { code: "alfa", emoji: "🌿", name: "Lucernă", role: "Furaj & refacere sol", tip: "Excelentă pentru fân/furaj și pentru refacerea structurii pământului.", baseSix: 6900, maxYield: 12500, waterNeed: 480, baseCbd: 88,  baseCyl: 195, waterSens: 0.35, thermBase: 0.92 },
-        barley:    { code: "barl", emoji: "🌾", name: "Orz", role: "Recoltare timpurie", tip: "Se coace mai devreme decât grâul și evită seceta de vară.", baseSix: 7300, maxYield: 7900, waterNeed: 270, baseCbd: 276, baseCyl: 256, waterSens: 0.16, thermBase: 0.95 },
-        rapeseed:  { code: "rape", emoji: "🌼", name: "Rapiță", role: "Cultură rentabilă de toamnă", tip: "Eliberează terenul devreme vara și lasă pământul afânat.", baseSix: 6700, maxYield: 4500, waterNeed: 310, baseCbd: 248, baseCyl: 284, waterSens: 0.24, thermBase: 0.90 },
-        potato:    { code: "pota", emoji: "🥔", name: "Cartof", role: "Cultură intensivă", tip: "Cere sol afânat și udări regulate.", baseSix: 5400, maxYield: 36000, waterNeed: 460, baseCbd: 95,  baseCyl: 118, waterSens: 0.42, thermBase: 0.85 }
+        maize:     { code: "maiz", emoji: "🌽", name: "Grain maize", role: "Main row crop", tip: "Produces a high yield but needs water in summer.", baseSix: 6800, maxYield: 11800, waterNeed: 410, baseCbd: 108, baseCyl: 138, waterSens: 0.34, thermBase: 0.91 },
+        wheat:     { code: "whea", emoji: "🌾", name: "Winter wheat", role: "Reliable cereal crop", tip: "Uses autumn and spring rain and avoids the July heat.", baseSix: 7400, maxYield: 8600, waterNeed: 290, baseCbd: 282, baseCyl: 268, waterSens: 0.18, thermBase: 0.94 },
+        sunflower: { code: "sunf", emoji: "🌻", name: "Sunflower", role: "Drought resistant", tip: "Its deep roots find water in the soil; it suits drier areas.", baseSix: 7200, maxYield: 4200, waterNeed: 320, baseCbd: 102, baseCyl: 128, waterSens: 0.22, thermBase: 0.93 },
+        soybean:   { code: "soyb", emoji: "🫘", name: "Soybean", role: "Improves the soil", tip: "Leaves natural nitrogen for the next crop and prefers irrigated land.", baseSix: 6100, maxYield: 4100, waterNeed: 440, baseCbd: 115, baseCyl: 132, waterSens: 0.38, thermBase: 0.89 },
+        alfalfa:   { code: "alfa", emoji: "🌿", name: "Alfalfa", role: "Feed & soil recovery", tip: "Excellent for hay and animal feed and helps rebuild soil structure.", baseSix: 6900, maxYield: 12500, waterNeed: 480, baseCbd: 88,  baseCyl: 195, waterSens: 0.35, thermBase: 0.92 },
+        barley:    { code: "barl", emoji: "🌾", name: "Barley", role: "Early harvest", tip: "Ripens earlier than wheat and avoids summer drought.", baseSix: 7300, maxYield: 7900, waterNeed: 270, baseCbd: 276, baseCyl: 256, waterSens: 0.16, thermBase: 0.95 },
+        rapeseed:  { code: "rape", emoji: "🌼", name: "Rapeseed", role: "Profitable autumn crop", tip: "Frees the land early in summer and leaves the soil loose.", baseSix: 6700, maxYield: 4500, waterNeed: 310, baseCbd: 248, baseCyl: 284, waterSens: 0.24, thermBase: 0.90 },
+        potato:    { code: "pota", emoji: "🥔", name: "Potato", role: "Intensive crop", tip: "Needs loose soil and regular watering.", baseSix: 5400, maxYield: 36000, waterNeed: 460, baseCbd: 95,  baseCyl: 118, waterSens: 0.42, thermBase: 0.85 }
     };
 
     const MGMT_PARAMS = {
-        HRLM: { label: "Fără irigații, îngrijire completă", sixMult: 0.86, yieldMult: 0.82, wdeMult: 1.00 },
-        HILM: { label: "Cu irigații, îngrijire completă", sixMult: 1.18, yieldMult: 1.24, wdeMult: 0.15 },
-        LRLM: { label: "Fără irigații, buget redus", sixMult: 0.54, yieldMult: 0.48, wdeMult: 1.00 },
-        LILM: { label: "Cu irigații, buget redus", sixMult: 0.78, yieldMult: 0.74, wdeMult: 0.18 }
+        HRLM: { label: "Rainfed, full care", sixMult: 0.86, yieldMult: 0.82, wdeMult: 1.00 },
+        HILM: { label: "Irrigated, full care", sixMult: 1.18, yieldMult: 1.24, wdeMult: 0.15 },
+        LRLM: { label: "Rainfed, reduced budget", sixMult: 0.54, yieldMult: 0.48, wdeMult: 1.00 },
+        LILM: { label: "Irrigated, reduced budget", sixMult: 0.78, yieldMult: 0.74, wdeMult: 0.18 }
     };
 
     const COUNTIES = {
@@ -1208,46 +1208,46 @@
         }
     }
 
-    function dayOfYearToRomanianDate(doy) {
-        const monthsRo = ['Ianuarie', 'Februarie', 'Martie', 'Aprilie', 'Mai', 'Iunie', 'Iulie', 'August', 'Septembrie', 'Octombrie', 'Noiembrie', 'Decembrie'];
+    function dayOfYearToDate(doy) {
+        const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
         const date = new Date(Date.UTC(2025, 0, 1));
         date.setUTCDate(doy);
-        return `${date.getUTCDate()} ${monthsRo[date.getUTCMonth()]}`;
+        return `${date.getUTCDate()} ${months[date.getUTCMonth()]}`;
     }
 
     function classifyFarmerSuitability(six) {
         if (six >= 7500) {
             return {
-                badgeLabel: '⭐ Foarte potrivit aici',
-                riskLabel: 'Risc mic',
+                badgeLabel: '⭐ Very suitable here',
+                riskLabel: 'Low risk',
                 riskClass: 'risk-low',
-                farmerVerdict: 'Teren foarte bun pentru această cultură! Ai șanse mari la o recoltă bogată.',
+                farmerVerdict: 'This is very good land for this crop! You have a strong chance of a good harvest.',
                 classColor: '#10b981'
             };
         }
         if (six >= 5500) {
             return {
-                badgeLabel: '👍 Potrivit aici',
-                riskLabel: 'Risc scăzut-mediu',
+                badgeLabel: '👍 Suitable here',
+                riskLabel: 'Low to medium risk',
                 riskClass: 'risk-low',
-                farmerVerdict: 'Cultura merge bine pe acest teren dacă faci lucrările la timp.',
+                farmerVerdict: 'This crop should perform well if you complete the farm work on time.',
                 classColor: '#38bdf8'
             };
         }
         if (six < 3500) {
             return {
-                badgeLabel: '⛔ Nerecomandat aici',
-                riskLabel: 'Risc mare de pierdere',
+                badgeLabel: '⛔ Not recommended here',
+                riskLabel: 'High loss risk',
                 riskClass: 'risk-high',
-                farmerVerdict: 'Nu merită riscul aici (sol slab sau lipsă mare de apă). Alege o opțiune din lista de sus.',
+                farmerVerdict: 'The risk is too high here because of weak soil or limited water. Choose an option from the list above.',
                 classColor: '#ef4444'
             };
         }
         return {
-            badgeLabel: '⚠️ Merge, dar cu risc',
-            riskLabel: 'Risc moderat de secetă',
+            badgeLabel: '⚠️ Possible, but risky',
+            riskLabel: 'Moderate drought risk',
             riskClass: 'risk-med',
-            farmerVerdict: 'Se poate cultiva, dar recolta depinde mult de ploi sau de irigații.',
+            farmerVerdict: 'You can grow it, but the harvest will depend heavily on rainfall or irrigation.',
             classColor: '#f59e0b'
         };
     }
@@ -1357,15 +1357,15 @@
     const map = L.map('map', { zoomControl: true }).setView([44.52, 26.55], 8);
 
     const baseLayers = {
-        "Hartă drumuri și sate": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+        "Road and village map": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
             attribution: 'Tiles &copy; Esri', maxZoom: 19
         }),
-        "Vedere din satelit": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        "Satellite view": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
             attribution: 'Tiles &copy; Esri', maxZoom: 18
         })
     };
 
-    baseLayers["Hartă drumuri și sate"].addTo(map);
+    baseLayers["Road and village map"].addTo(map);
     L.control.layers(baseLayers, null, { position: 'topright' }).addTo(map);
 
     const rasterLayerGroup = L.layerGroup().addTo(map);
@@ -1376,16 +1376,16 @@
     const nasaCache = {};
 
     // =========================================================================
-    // GPS "GĂSEȘTE TERENUL MEU" BUTTON
+    // GPS "FIND MY LAND" BUTTON
     // =========================================================================
     document.getElementById('locateMeBtn').addEventListener('click', () => {
         const fb = document.getElementById('gpsFeedback');
         fb.style.display = 'block';
         if (!navigator.geolocation) {
-            fb.textContent = 'Telefonul sau browserul nu permite localizarea GPS. Alege județul din listă.';
+            fb.textContent = 'Your phone or browser does not support GPS location. Choose a county from the list.';
             return;
         }
-        fb.textContent = '⏳ Căutăm poziția ta GPS...';
+        fb.textContent = '⏳ Finding your GPS location...';
 
         navigator.geolocation.getCurrentPosition(
             (pos) => {
@@ -1399,7 +1399,7 @@
                     color: '#ffffff',
                     weight: 2.5,
                     fillOpacity: 1
-                }).addTo(map).bindPopup('📍 Poziția ta actuală').openPopup();
+                }).addTo(map).bindPopup('📍 Your current location').openPopup();
 
                 // Find nearest monitored grid cell
                 let closest = null;
@@ -1415,17 +1415,17 @@
                 });
 
                 if (closest && bestDist <= 0.45) {
-                    fb.textContent = `✅ Te-am localizat în jud. ${closest.county}!`;
+                    fb.textContent = `✅ We located you in ${closest.county}!`;
                     document.getElementById('countySelect').value = closest.county;
                     map.flyTo([closest.lat, closest.lng], 10, { duration: 0.8 });
                     selectAndAnalyzeCell(closest, true);
                 } else {
-                    fb.textContent = '📍 Te-am găsit pe hartă! Ești în afara zonei de sud monitorizate — apasă pe orice pătrat colorat.';
+                    fb.textContent = '📍 We found you on the map! You are outside the monitored southern area — click any colored square.';
                     map.flyTo([uLat, uLng], 9, { duration: 0.8 });
                 }
             },
             () => {
-                fb.textContent = 'Nu am primit permisiunea GPS. Alege județul tău din lista de mai jos.';
+                fb.textContent = 'GPS permission was not granted. Choose your county from the list below.';
             },
             { enableHighAccuracy: true, timeout: 8000 }
         );
@@ -1437,21 +1437,21 @@
         let items = [];
 
         if (indicator === 'SIX') {
-            titleEl.textContent = 'Cât de roditor e terenul';
+            titleEl.textContent = 'How fertile is the land?';
             items = [
-                { color: '#047857', label: 'Verde închis — Foarte roditor' },
-                { color: '#10b981', label: 'Verde — Bun' },
-                { color: '#84cc16', label: 'Verde deschis — Acceptabil' },
-                { color: '#facc15', label: 'Galben — Risc de secetă' },
-                { color: '#f97316', label: 'Portocaliu — Slab / Nerecomandat' }
+                { color: '#047857', label: 'Dark green — Very fertile' },
+                { color: '#10b981', label: 'Green — Good' },
+                { color: '#84cc16', label: 'Light green — Acceptable' },
+                { color: '#facc15', label: 'Yellow — Drought risk' },
+                { color: '#f97316', label: 'Orange — Weak / Not recommended' }
             ];
         } else {
-            titleEl.textContent = 'Scară indicator';
+            titleEl.textContent = 'Indicator scale';
             items = [
-                { color: '#047857', label: 'Optim' },
-                { color: '#10b981', label: 'Bun' },
-                { color: '#facc15', label: 'Moderat' },
-                { color: '#ef4444', label: 'Risc ridicat' }
+                { color: '#047857', label: 'Optimal' },
+                { color: '#10b981', label: 'Good' },
+                { color: '#facc15', label: 'Moderate' },
+                { color: '#ef4444', label: 'High risk' }
             ];
         }
 
@@ -1471,10 +1471,10 @@
         const mgmtKey = getCurrentMgmtKey();
         const crop = CROP_PARAMS[cropKey];
         const tonsPerHa = (metrics.ylx / 1000).toFixed(1);
-        const sowingDateRo = dayOfYearToRomanianDate(metrics.cbd);
+        const sowingDate = dayOfYearToDate(metrics.cbd);
 
-        document.getElementById('activeCellBadge').textContent = `Jud. ${cell.county} (${cell.lat.toFixed(2)}°N, ${cell.lng.toFixed(2)}°E)`;
-        document.getElementById('landIntroText').innerHTML = `Pe terenul ales din <strong>județul ${cell.county}</strong> (${MGMT_PARAMS[mgmtKey].label.toLowerCase()}), cele mai bune variante sunt:`;
+        document.getElementById('activeCellBadge').textContent = `${cell.county} (${cell.lat.toFixed(2)}°N, ${cell.lng.toFixed(2)}°E)`;
+        document.getElementById('landIntroText').innerHTML = `For the selected field in <strong>${cell.county}</strong> (${MGMT_PARAMS[mgmtKey].label.toLowerCase()}), the best options are:`;
 
         // Rank all 8 crops according to the selected farmer filter
         const rankedCrops = Object.entries(CROP_PARAMS).map(([k, cfg]) => {
@@ -1488,27 +1488,27 @@
         });
 
         bestOptionsList.innerHTML = rankedCrops.slice(0, 4).map((item, idx) => {
-            const medal = idx === 0 ? '🥇 Varianta #1:' : idx === 1 ? '🥈 Varianta #2:' : idx === 2 ? '🥉 Varianta #3:' : '4.';
+            const medal = idx === 0 ? '🥇 Option #1:' : idx === 1 ? '🥈 Option #2:' : idx === 2 ? '🥉 Option #3:' : '4.';
             
             // Primary & secondary metric readout based on active filter
-            let primaryReadout = `Scor ${item.m.six.toLocaleString('ro-RO')} / 10.000`;
-            let secondaryReadout = `~${(item.m.ylx / 1000).toFixed(1)} tone/ha`;
+            let primaryReadout = `Score ${item.m.six.toLocaleString('en-US')} / 10,000`;
+            let secondaryReadout = `~${(item.m.ylx / 1000).toFixed(1)} tons/ha`;
 
             if (selectedCropRankCriterion === 'YLX') {
-                primaryReadout = `~${(item.m.ylx / 1000).toFixed(1)} tone/ha`;
-                secondaryReadout = `Pretabilitate: ${Math.round(item.m.six / 100)}%`;
+                primaryReadout = `~${(item.m.ylx / 1000).toFixed(1)} tons/ha`;
+                secondaryReadout = `Suitability: ${Math.round(item.m.six / 100)}%`;
             } else if (selectedCropRankCriterion === 'FC2') {
                 const waterPct = Math.round(item.m.fc2 * 100);
-                primaryReadout = `Apă: ${item.m.fc2.toFixed(2)} (${waterPct}%)`;
-                secondaryReadout = `~${(item.m.ylx / 1000).toFixed(1)} tone/ha`;
+                primaryReadout = `Water: ${item.m.fc2.toFixed(2)} (${waterPct}%)`;
+                secondaryReadout = `~${(item.m.ylx / 1000).toFixed(1)} tons/ha`;
             } else if (selectedCropRankCriterion === 'FC1') {
                 const thermPct = Math.round(item.m.fc1 * 100);
-                primaryReadout = `Termic: ${item.m.fc1.toFixed(2)} (${thermPct}%)`;
-                secondaryReadout = `~${(item.m.ylx / 1000).toFixed(1)} tone/ha`;
+                primaryReadout = `Heat: ${item.m.fc1.toFixed(2)} (${thermPct}%)`;
+                secondaryReadout = `~${(item.m.ylx / 1000).toFixed(1)} tons/ha`;
             } else {
                 const suitPct = Math.round(item.m.six / 100);
-                primaryReadout = `Pretabilitate: ${suitPct}%`;
-                secondaryReadout = `~${(item.m.ylx / 1000).toFixed(1)} tone/ha`;
+                primaryReadout = `Suitability: ${suitPct}%`;
+                secondaryReadout = `~${(item.m.ylx / 1000).toFixed(1)} tons/ha`;
             }
 
             return `
@@ -1541,28 +1541,28 @@
 
             <div class="farmer-kpi-grid">
                 <div class="farmer-kpi">
-                    <div class="farmer-kpi-label">⚖️ Cât poți recolta</div>
-                    <div class="farmer-kpi-val" style="color:#34d399;">~${tonsPerHa} tone / ha</div>
-                    <div class="farmer-kpi-sub">${metrics.ylx.toLocaleString('ro-RO')} kg la hectar</div>
+                    <div class="farmer-kpi-label">⚖️ Expected harvest</div>
+                    <div class="farmer-kpi-val" style="color:#34d399;">~${tonsPerHa} tons / ha</div>
+                    <div class="farmer-kpi-sub">${metrics.ylx.toLocaleString('en-US')} kg per hectare</div>
                 </div>
                 <div class="farmer-kpi">
-                    <div class="farmer-kpi-label">📅 Perioada de semănat</div>
-                    <div class="farmer-kpi-val" style="color:#38bdf8;">~${sowingDateRo}</div>
-                    <div class="farmer-kpi-sub">Recoltare după ~${metrics.cyl} zile</div>
+                    <div class="farmer-kpi-label">📅 Sowing period</div>
+                    <div class="farmer-kpi-val" style="color:#38bdf8;">~${sowingDate}</div>
+                    <div class="farmer-kpi-sub">Harvest after ~${metrics.cyl} days</div>
                 </div>
             </div>
         `;
 
         // Technical details (hidden inside <details>)
         techList.innerHTML = `
-            <div class="inspector-row"><span>Cod zonă & Coordonate:</span><strong>${cell.id} (${cell.lat}°N, ${cell.lng}°E)</strong></div>
-            <div class="inspector-row"><span>Indice pretabilitate FAO (RES05-SIX):</span><strong>${metrics.six.toLocaleString('ro-RO')} / 10.000</strong></div>
-            <div class="inspector-row"><span>Producție potențială (RES05-YLX):</span><strong>${metrics.ylx.toLocaleString('ro-RO')} kg/ha</strong></div>
-            <div class="inspector-row"><span>Deficit hidric anual (RES02-WDE):</span><strong>${metrics.wde} mm/an</strong></div>
-            <div class="inspector-row"><span>Ziua semănatului (RES02-CBD):</span><strong>Ziua ${metrics.cbd} (${sowingDateRo})</strong></div>
-            <div class="inspector-row"><span>Durata ciclului (RES02-CYL):</span><strong>${metrics.cyl} zile</strong></div>
-            <div class="inspector-row"><span>Factor limitativ apă (RES02-FC2):</span><strong>${metrics.fc2.toFixed(2)}</strong></div>
-            <div class="inspector-row"><span>Factor limitativ termic (RES02-FC1):</span><strong>${metrics.fc1.toFixed(2)}</strong></div>
+            <div class="inspector-row"><span>Field code & coordinates:</span><strong>${cell.id} (${cell.lat}°N, ${cell.lng}°E)</strong></div>
+            <div class="inspector-row"><span>FAO suitability index (RES05-SIX):</span><strong>${metrics.six.toLocaleString('en-US')} / 10,000</strong></div>
+            <div class="inspector-row"><span>Potential yield (RES05-YLX):</span><strong>${metrics.ylx.toLocaleString('en-US')} kg/ha</strong></div>
+            <div class="inspector-row"><span>Annual water deficit (RES02-WDE):</span><strong>${metrics.wde} mm/year</strong></div>
+            <div class="inspector-row"><span>Sowing day (RES02-CBD):</span><strong>Day ${metrics.cbd} (${sowingDate})</strong></div>
+            <div class="inspector-row"><span>Growing cycle length (RES02-CYL):</span><strong>${metrics.cyl} days</strong></div>
+            <div class="inspector-row"><span>Water limitation factor (RES02-FC2):</span><strong>${metrics.fc2.toFixed(2)}</strong></div>
+            <div class="inspector-row"><span>Heat limitation factor (RES02-FC1):</span><strong>${metrics.fc1.toFixed(2)}</strong></div>
         `;
     }
 
@@ -1594,8 +1594,8 @@
         }
     }
 
-    function formatShortRoDate(yyyymmdd) {
-        const monthsShort = ['Ian', 'Feb', 'Mar', 'Apr', 'Mai', 'Iun', 'Iul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    function formatShortDate(yyyymmdd) {
+        const monthsShort = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         const m = parseInt(yyyymmdd.slice(4, 6), 10) - 1;
         const d = parseInt(yyyymmdd.slice(6, 8), 10);
         return `${d} ${monthsShort[m]}`;
@@ -1647,7 +1647,7 @@
             weeklyPrecipSums.push(Number(sumMm.toFixed(1)));
         }
 
-        // Chart 1: Temperatura aerului la 2 m (T2M_MAX, T2M_MIN, T2M)
+        // Chart 1: Air temperature at 2 m (T2M_MAX, T2M_MIN, T2M)
         const ctx1 = document.getElementById('tempCycleChart');
         if (ctx1) {
             tempCycleChartInstance = new Chart(ctx1.getContext('2d'), {
@@ -1656,7 +1656,7 @@
                     labels,
                     datasets: [
                         {
-                            label: 'Maximă (T2M_MAX)',
+                            label: 'High (T2M_MAX)',
                             data: tmaxSeries,
                             borderColor: '#ef4444',
                             backgroundColor: 'transparent',
@@ -1665,7 +1665,7 @@
                             tension: 0.25
                         },
                         {
-                            label: 'Medie (T2M)',
+                            label: 'Average (T2M)',
                             data: tmeanSeries,
                             borderColor: '#f59e0b',
                             backgroundColor: 'transparent',
@@ -1674,7 +1674,7 @@
                             tension: 0.25
                         },
                         {
-                            label: 'Minimă (T2M_MIN)',
+                            label: 'Low (T2M_MIN)',
                             data: tminSeries,
                             borderColor: '#38bdf8',
                             backgroundColor: 'transparent',
@@ -1708,7 +1708,7 @@
             });
         }
 
-        // Chart 2: Precipitațiile (Sume săptămânale PRECTOTCORR în mm)
+        // Chart 2: Rainfall (weekly PRECTOTCORR totals in mm)
         const ctx2 = document.getElementById('precipCycleChart');
         if (ctx2) {
             precipCycleChartInstance = new Chart(ctx2.getContext('2d'), {
@@ -1716,7 +1716,7 @@
                 data: {
                     labels: weeklyLabels,
                     datasets: [{
-                        label: 'Precipitații săptămânale (mm)',
+                        label: 'Weekly rainfall (mm)',
                         data: weeklyPrecipSums,
                         backgroundColor: '#0284c7',
                         hoverBackgroundColor: '#38bdf8',
@@ -1744,7 +1744,7 @@
             });
         }
 
-        // Chart 3: Saturația relativă modelată a solului (GWETROOT * 100, medie mobilă 7 zile)
+        // Chart 3: Modeled relative soil moisture (GWETROOT * 100, 7-day moving average)
         const ctx3 = document.getElementById('soilCycleChart');
         if (ctx3) {
             soilCycleChartInstance = new Chart(ctx3.getContext('2d'), {
@@ -1752,7 +1752,7 @@
                 data: {
                     labels,
                     datasets: [{
-                        label: 'Umiditate sol (%)',
+                        label: 'Soil moisture (%)',
                         data: soilPctSeries,
                         borderColor: '#10b981',
                         backgroundColor: 'rgba(16, 185, 129, 0.16)',
@@ -1800,8 +1800,8 @@
         const endStr = formatNasaDate(end);
         const cacheKey = `${cell.lat.toFixed(2)}_${cell.lng.toFixed(2)}_${startStr}_${endStr}`;
 
-        panel.innerHTML = `<p class="helper-hint" style="margin-top:8px;">Verificăm datele climatice din ultimele 12 luni pentru jud. ${cell.county}...</p>`;
-        fetchBadge.textContent = "Se încarcă...";
+        panel.innerHTML = `<p class="helper-hint" style="margin-top:8px;">Checking climate data for the last 12 months in ${cell.county}...</p>`;
+        fetchBadge.textContent = "Loading...";
 
         try {
             let data;
@@ -1826,13 +1826,13 @@
             let validDays = 0;
 
             // 5 Specific Climatic Indicators from Photo 2
-            let dryDaysCount = 0;           // Zile cu precipitații < 1 mm/zi
+            let dryDaysCount = 0;           // Days with precipitation < 1 mm/day
             let currentDryStreak = 0;
-            let maxDryStreak = 0;           // Cea mai lungă perioadă uscată (zile consecutive < 1 mm/zi)
+            let maxDryStreak = 0;           // Longest dry period (consecutive days < 1 mm/day)
 
-            let veryHotDaysCount = 0;       // Zile foarte calde: Tmax >= 35°C
+            let veryHotDaysCount = 0;       // Very hot days: Tmax >= 35°C
             let currentHotStreak = 0;
-            let maxHotStreak = 0;           // Cea mai lungă perioadă foarte caldă (zile consecutive Tmax >= 35°C)
+            let maxHotStreak = 0;           // Longest very hot period (consecutive days Tmax >= 35°C)
 
             const dailyRecords = [];
 
@@ -1857,7 +1857,7 @@
                     if (gwet > -900) sumGwet += gwet;
                     validDays++;
 
-                    // Indicator 2 & 3: Zile uscate (< 1 mm/zi) & Cea mai lungă perioadă uscată
+                    // Indicators 2 & 3: Dry days (< 1 mm/day) and longest dry period
                     if (precip < 1.0) {
                         dryDaysCount++;
                         currentDryStreak++;
@@ -1866,7 +1866,7 @@
                         currentDryStreak = 0;
                     }
 
-                    // Indicator 4 & 5: Zile foarte calde (Tmax >= 35°C) & Cea mai lungă perioadă foarte caldă
+                    // Indicators 4 & 5: Very hot days (Tmax >= 35°C) and longest hot period
                     if (tmax >= 35.0) {
                         veryHotDaysCount++;
                         currentHotStreak++;
@@ -1884,7 +1884,7 @@
                     dailyRecords.push({
                         dt,
                         doy: getDayOfYear(dObj),
-                        label: formatShortRoDate(dt),
+                        label: formatShortDate(dt),
                         tmax: Number(tmax.toFixed(1)),
                         tmin: Number(tmin.toFixed(1)),
                         tmean,
@@ -1906,13 +1906,13 @@
             let verdictText = "";
             if (deficitDelta > 80 || (avgRootMoisture !== "N/A" && Number(avgRootMoisture) < 42) || maxDryStreak >= 25) {
                 bannerClass = "alert";
-                verdictText = `⚠️ Risc ridicat de secetă: S-au strâns ${precipTotalInt} mm precipitații, cu ${dryDaysCount} zile uscate (maxim ${maxDryStreak} zile consecutive fără ploaie) și ${veryHotDaysCount} zile cu arșiță ≥35°C.`;
+                verdictText = `⚠️ High drought risk: ${precipTotalInt} mm of rainfall, ${dryDaysCount} dry days (up to ${maxDryStreak} consecutive days without rain), and ${veryHotDaysCount} days with heat ≥35°C.`;
             } else if (deficitDelta > 15 || veryHotDaysCount >= 10) {
                 bannerClass = "warn";
-                verdictText = `⚡ Atenție la stresul hidric și termic: ${precipTotalInt} mm precipitații cumulate, ${maxDryStreak} zile consecutive uscate și ${veryHotDaysCount} zile cu Tmax ≥35°C.`;
+                verdictText = `⚡ Watch for water and heat stress: ${precipTotalInt} mm of accumulated rainfall, ${maxDryStreak} consecutive dry days, and ${veryHotDaysCount} days with Tmax ≥35°C.`;
             } else {
                 bannerClass = "ok";
-                verdictText = `✅ Regim climatic echilibrat: ${precipTotalInt} mm precipitații cumulate, umiditate medie în sol ${avgRootMoisture}% și doar ${veryHotDaysCount} zile cu Tmax ≥35°C.`;
+                verdictText = `✅ Balanced climate: ${precipTotalInt} mm of accumulated rainfall, average soil moisture of ${avgRootMoisture}%, and only ${veryHotDaysCount} days with Tmax ≥35°C.`;
             }
 
             lastNasaAnalysis = {
@@ -1929,43 +1929,43 @@
                 verdictText
             };
 
-            const sowDateText = dayOfYearToRomanianDate(gaezMetrics.cbd);
+            const sowDateText = dayOfYearToDate(gaezMetrics.cbd);
             const harvestDoy = ((gaezMetrics.cbd + gaezMetrics.cyl - 1) % 365) + 1;
-            const harvestDateText = dayOfYearToRomanianDate(harvestDoy);
+            const harvestDateText = dayOfYearToDate(harvestDoy);
 
-            fetchBadge.textContent = `Actualizat (${validDays} zile)`;
+            fetchBadge.textContent = `Updated (${validDays} days)`;
 
             panel.innerHTML = `
                 <!-- 5 Specific Climatic Indicators (Photo 2) -->
                 <div class="climate-kpi-grid">
                     <div class="farmer-kpi climate-kpi-full">
-                        <div class="farmer-kpi-label">🌧️ 1. Precipitații cumulate (12 luni)</div>
+                        <div class="farmer-kpi-label">🌧️ 1. Accumulated rainfall (12 months)</div>
                         <div class="farmer-kpi-val" style="color:#38bdf8;">${precipTotalInt} mm <span style="font-size:0.78rem; font-weight:600; color:#94a3b8;">(${precipTotalInt} litri/m²)</span></div>
-                        <div class="farmer-kpi-sub">Umiditate medie rădăcini: ${avgRootMoisture}% • Maximă medie: ${avgTmax}°C</div>
+                        <div class="farmer-kpi-sub">Average root moisture: ${avgRootMoisture}% • Average high: ${avgTmax}°C</div>
                     </div>
 
                     <div class="farmer-kpi">
-                        <div class="farmer-kpi-label">🏜️ 2. Număr de zile uscate</div>
-                        <div class="farmer-kpi-val" style="color:#fbbf24;">${dryDaysCount} zile</div>
-                        <div class="farmer-kpi-sub">Zile cu precipitații &lt;1 mm/zi</div>
+                        <div class="farmer-kpi-label">🏜️ 2. Number of dry days</div>
+                        <div class="farmer-kpi-val" style="color:#fbbf24;">${dryDaysCount} days</div>
+                        <div class="farmer-kpi-sub">Days with rainfall &lt;1 mm/day</div>
                     </div>
 
                     <div class="farmer-kpi">
-                        <div class="farmer-kpi-label">⏳ 3. Cea mai lungă perioadă uscată</div>
-                        <div class="farmer-kpi-val" style="color:#f97316;">${maxDryStreak} zile</div>
-                        <div class="farmer-kpi-sub">Zile consecutive cu &lt;1 mm/zi</div>
+                        <div class="farmer-kpi-label">⏳ 3. Longest dry period</div>
+                        <div class="farmer-kpi-val" style="color:#f97316;">${maxDryStreak} days</div>
+                        <div class="farmer-kpi-sub">Consecutive days with &lt;1 mm/day</div>
                     </div>
 
                     <div class="farmer-kpi">
-                        <div class="farmer-kpi-label">🔥 4. Număr de zile foarte calde</div>
-                        <div class="farmer-kpi-val" style="color:#ef4444;">${veryHotDaysCount} zile</div>
-                        <div class="farmer-kpi-sub">Zile cu Tmax ≥35°C</div>
+                        <div class="farmer-kpi-label">🔥 4. Number of very hot days</div>
+                        <div class="farmer-kpi-val" style="color:#ef4444;">${veryHotDaysCount} days</div>
+                        <div class="farmer-kpi-sub">Days with Tmax ≥35°C</div>
                     </div>
 
                     <div class="farmer-kpi">
-                        <div class="farmer-kpi-label">🌡️ 5. Cea mai lungă perioadă foarte caldă</div>
-                        <div class="farmer-kpi-val" style="color:#f43f5e;">${maxHotStreak} zile</div>
-                        <div class="farmer-kpi-sub">Zile consecutive cu Tmax ≥35°C</div>
+                        <div class="farmer-kpi-label">🌡️ 5. Longest very hot period</div>
+                        <div class="farmer-kpi-val" style="color:#f43f5e;">${maxHotStreak} days</div>
+                        <div class="farmer-kpi-sub">Consecutive days with Tmax ≥35°C</div>
                     </div>
                 </div>
 
@@ -1976,13 +1976,13 @@
                 <!-- 3 Graphs in the Selected Crop's Specific Growing Interval (Photo 1) -->
                 <div class="crop-charts-wrapper">
                     <div class="crop-cycle-header">
-                        <span class="crop-cycle-title">📈 Evoluție în intervalul culturii: ${crop.emoji} ${crop.name}</span>
-                        <span class="crop-cycle-window">${sowDateText} – ${harvestDateText} (${gaezMetrics.cyl} zile)</span>
+                        <span class="crop-cycle-title">📈 Crop season trend: ${crop.emoji} ${crop.name}</span>
+                        <span class="crop-cycle-window">${sowDateText} – ${harvestDateText} (${gaezMetrics.cyl} days)</span>
                     </div>
 
                     <div class="mini-chart-box">
                         <div class="mini-chart-title">
-                            <span>1. Temperatura aerului la 2 m (°C)</span>
+                            <span>1. Air temperature at 2 m (°C)</span>
                             <span class="mini-chart-sub">T2M_MAX, T2M, T2M_MIN</span>
                         </div>
                         <div class="mini-chart-canvas-wrap">
@@ -1992,7 +1992,7 @@
 
                     <div class="mini-chart-box">
                         <div class="mini-chart-title">
-                            <span>2. Precipitațiile — sume săptămânale (mm)</span>
+                            <span>2. Rainfall — weekly totals (mm)</span>
                             <span class="mini-chart-sub">PRECTOTCORR</span>
                         </div>
                         <div class="mini-chart-canvas-wrap">
@@ -2002,8 +2002,8 @@
 
                     <div class="mini-chart-box">
                         <div class="mini-chart-title">
-                            <span>3. Saturația relativă modelată a solului (%)</span>
-                            <span class="mini-chart-sub">GWETROOT × 100 (medie 7 zile)</span>
+                            <span>3. Modeled relative soil moisture (%)</span>
+                            <span class="mini-chart-sub">GWETROOT × 100 (7-day average)</span>
                         </div>
                         <div class="mini-chart-canvas-wrap">
                             <canvas id="soilCycleChart"></canvas>
@@ -2019,8 +2019,8 @@
             }
 
         } catch (err) {
-            fetchBadge.textContent = 'Indisponibil';
-            panel.innerHTML = `<p class="helper-hint" style="color:#fca5a5; margin-top:8px;">Datele meteo nu s-au putut încărca acum. Verifică conexiunea la internet.</p>`;
+            fetchBadge.textContent = 'Unavailable';
+            panel.innerHTML = `<p class="helper-hint" style="color:#fca5a5; margin-top:8px;">Weather data could not be loaded. Check your internet connection.</p>`;
             lastNasaAnalysis = null;
             if (document.getElementById('autoAiOnClick') && document.getElementById('autoAiOnClick').checked) {
                 askLocalAi();
@@ -2074,9 +2074,9 @@
             });
 
             rect.bindTooltip(
-                `<strong>Jud. ${cell.county}</strong><br>` +
+                `<strong>${cell.county}</strong><br>` +
                 `${metrics.badgeLabel}<br>` +
-                `Recoltă estimată: <b>~${(metrics.ylx / 1000).toFixed(1)} t/ha</b>`,
+                `Estimated yield: <b>~${(metrics.ylx / 1000).toFixed(1)} tons/ha</b>`,
                 { direction: 'top', opacity: 0.95 }
             );
 
@@ -2117,7 +2117,7 @@
             data: {
                 labels: stats.map(s => s.county),
                 datasets: [{
-                    label: 'Medie județ',
+                    label: 'County average',
                     data: stats.map(s => s.mean),
                     backgroundColor: stats.map(s => s.county === selectedCounty ? '#10b981' : '#38bdf8'),
                     borderRadius: 4
@@ -2161,7 +2161,7 @@
         }).sort((a, b) => b.six - a.six);
 
         const cropsSummaryText = allCropsRanking
-            .map((c, idx) => `${idx + 1}. ${c.name}: recoltă estimată ${(c.ylx/1000).toFixed(1)} t/ha, scor ${c.six}/10000`)
+            .map((c, idx) => `${idx + 1}. ${c.name}: estimated yield ${(c.ylx/1000).toFixed(1)} tons/ha, score ${c.six}/10000`)
             .join('\n');
 
         if (aiAbortController) {
@@ -2170,26 +2170,26 @@
         aiAbortController = new AbortController();
 
         button.disabled = true;
-        result.textContent = `⏳ Pregătim planul pentru terenul tău din jud. ${targetCell.county}...`;
+        result.textContent = `⏳ Preparing the plan for your field in ${targetCell.county}...`;
 
         const nasaBlock = lastNasaAnalysis
-            ? `Date climatice ultimele 12 luni: precipitații cumulate ${lastNasaAnalysis.precipTotalInt} mm, ${lastNasaAnalysis.dryDaysCount} zile uscate (<1 mm/zi), cea mai lungă perioadă uscată ${lastNasaAnalysis.maxDryStreak} zile consecutive, ${lastNasaAnalysis.heatStressDays} zile foarte calde (Tmax ≥35°C), cea mai lungă perioadă foarte caldă ${lastNasaAnalysis.maxHotStreak} zile consecutive, umiditate medie sol ${lastNasaAnalysis.avgRootMoisture}%.`
-            : `Fără date meteo live momentan.`;
+            ? `Climate data for the last 12 months: ${lastNasaAnalysis.precipTotalInt} mm accumulated rainfall, ${lastNasaAnalysis.dryDaysCount} dry days (<1 mm/day), longest dry period ${lastNasaAnalysis.maxDryStreak} consecutive days, ${lastNasaAnalysis.heatStressDays} very hot days (Tmax ≥35°C), longest hot period ${lastNasaAnalysis.maxHotStreak} consecutive days, average soil moisture ${lastNasaAnalysis.avgRootMoisture}%.`
+            : `No live weather data is available right now.`;
 
-        const prompt = `Ești un inginer agronom din România și vorbești cu un fermier care te întreabă simplu: „Am terenul acesta în județul ${targetCell.county} (${MGMT_PARAMS[mgmtKey].label}). Ce pot să fac cu el?”
-Cultura pe care o are în minte: ${crop.name} (recoltă estimată ${(cellMetrics.ylx/1000).toFixed(1)} tone/ha).
-Cele mai bune culturi aici:
+        const prompt = `You are an agronomist advising a farmer in Romania. The farmer asks: "I have this field in ${targetCell.county} (${MGMT_PARAMS[mgmtKey].label}). What can I do with it?"
+The crop currently being considered is ${crop.name} (estimated yield ${(cellMetrics.ylx/1000).toFixed(1)} tons/ha).
+The best crops here are:
 ${cropsSummaryText}
 ${nasaBlock}
 
-Răspunde în limba română clar, cald și practic (fără formule sau coduri științifice):
-1. **Ce merită să faci acum:** Spune pe scurt dacă ${crop.name} e o alegere bună sau dacă altceva aduce câștig mai sigur.
-2. **Plan pe 4 ani ca să nu obosești pământul:**
-   - **Anul 1:** [Cultura + de ce]
-   - **Anul 2:** [Cultura + cum ajută solul]
-   - **Anul 3:** [Cultura + de ce]
-   - **Anul 4:** [Cultura + de ce]
-3. **Un sfat practic de gospodar:** Cum să păstrezi apa în pământ în zona asta.`;
+Answer in clear, friendly, practical English (no formulas or scientific codes):
+1. **What to do now:** Briefly say whether ${crop.name} is a good choice or whether another crop offers a safer return.
+2. **A 4-year plan to protect the soil:**
+   - **Year 1:** [Crop + why]
+   - **Year 2:** [Crop + how it helps the soil]
+   - **Year 3:** [Crop + why]
+   - **Year 4:** [Crop + why]
+3. **One practical farmer's tip:** How to keep water in the soil in this area.`;
 
         try {
             const response = await fetch('http://localhost:11434/api/generate', {
@@ -2205,7 +2205,7 @@ Răspunde în limba română clar, cald și practic (fără formule sau coduri �
             });
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const data = await response.json();
-            if (!data.response) throw new Error('Fără răspuns');
+            if (!data.response) throw new Error('No response');
             result.textContent = data.response.trim();
         } catch (error) {
             if (error.name === 'AbortError') return;
@@ -2214,19 +2214,19 @@ Răspunde în limba română clar, cald și practic (fără formule sau coduri �
             const c3 = allCropsRanking.find(c => ['soybean', 'alfalfa', 'sunflower'].includes(c.key) && c.key !== c1.key && c.key !== c2.key) || allCropsRanking[2];
             const c4 = allCropsRanking.find(c => c.key !== c1.key && c.key !== c2.key && c.key !== c3.key) || allCropsRanking[3];
 
-            result.textContent = `✅ Ce poți face cu terenul tău din jud. ${targetCell.county}:
+            result.textContent = `✅ What you can do with your field in ${targetCell.county}:
 
-1. Alegerea cea mai sigură acum:
-Pe acest pământ, ${c1.name} are cele mai bune condiții (~${(c1.ylx/1000).toFixed(1)} tone/ha).
+1. The safest choice now:
+${c1.name} has the best conditions on this land (~${(c1.ylx/1000).toFixed(1)} tons/ha).
 
-2. Ordinea recomandată pe 4 ani (rotația culturilor):
-• Anul 1: ${c1.emoji} ${c1.name} — scoate cea mai bună recoltă din terenul actual.
-• Anul 2: ${c2.emoji} ${c2.name} — cultură păioasă care curăță terenul de buruieni.
-• Anul 3: ${c3.emoji} ${c3.name} — reface pământul și reduce riscul de secetă.
-• Anul 4: ${c4.emoji} ${c4.name} — echilibrează solul înainte să reiei ciclul.
+2. Recommended 4-year rotation:
+• Year 1: ${c1.emoji} ${c1.name} — gives the best yield on the current land.
+• Year 2: ${c2.emoji} ${c2.name} — a cereal crop that helps control weeds.
+• Year 3: ${c3.emoji} ${c3.name} — rebuilds the soil and reduces drought risk.
+• Year 4: ${c4.emoji} ${c4.name} — balances the soil before the cycle starts again.
 
-3. Sfat practic:
-După recoltare, toacă paiele sau resturile și lasă-le la suprafață ca să țină umezeala în sol.`;
+3. Practical tip:
+After harvest, chop the straw or crop residues and leave them on the surface to keep moisture in the soil.`;
         } finally {
             button.disabled = false;
         }
@@ -2268,8 +2268,8 @@ După recoltare, toacă paiele sau resturile și lasă-le la suprafață ca să 
             : gridCells.filter(c => c.county === selectedCounty);
 
         const headers = [
-            'Zona_ID', 'Judet', 'Latitudine', 'Longitudine', 'Cultura', 'Mod_Lucru',
-            'Scor_Teren', 'Recolta_Estimata_kg_ha', 'Deficit_Apa_mm', 'Calificativ'
+            'Field_ID', 'County', 'Latitude', 'Longitude', 'Crop', 'Management',
+            'Land_Score', 'Estimated_Yield_kg_ha', 'Water_Deficit_mm', 'Rating'
         ];
         const rows = filteredCells.map(cell => {
             const m = computeCellMetrics(cell, cropKey, mgmtKey);

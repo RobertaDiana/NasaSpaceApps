@@ -1,0 +1,2308 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AgroSense — Ce pot să fac cu terenul meu?</title>
+    <!-- Leaflet JS (Open-Source BSD-2-Clause) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Chart.js (Open-Source MIT) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --bg-dark: #090e1a;
+            --bg-panel: #111827;
+            --bg-card: #1e293b;
+            --bg-card-hover: #283548;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent: #10b981;
+            --accent-hover: #059669;
+            --border: rgba(148, 163, 184, 0.16);
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(90deg, #0f172a 0%, #111827 50%, #0f172a 100%);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            gap: 10px;
+            position: sticky;
+            top: 0;
+        }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .brand-logo {
+            width: 38px;
+            height: 38px;
+            border-radius: 11px;
+            background: linear-gradient(135deg, #10b981 0%, #0284c7 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+        .brand-text h1 {
+            font-size: 1.05rem;
+            font-weight: 800;
+            letter-spacing: -0.01em;
+        }
+        .brand-text p {
+            color: var(--text-secondary);
+            font-size: 0.76rem;
+        }
+        .header-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .btn {
+            background-color: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid rgba(148, 163, 184, 0.28);
+            padding: 9px 14px;
+            border-radius: 10px;
+            font-size: 0.84rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            min-height: 42px;
+        }
+        .btn:hover {
+            background-color: var(--bg-card-hover);
+        }
+        .btn:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border: none;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+        }
+        .btn-gps {
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            border: none;
+            color: #ffffff;
+            width: 100%;
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+        }
+
+        /* Mobile Bottom Nav */
+        .mobile-nav {
+            display: none;
+        }
+
+        /* Desktop Layout */
+        @media (min-width: 961px) {
+            body {
+                height: 100vh;
+                overflow: hidden;
+            }
+            .main-container {
+                display: flex;
+                flex: 1;
+                overflow: hidden;
+            }
+            .sidebar {
+                width: 350px;
+                background-color: var(--bg-panel);
+                border-right: 1px solid var(--border);
+                padding: 18px;
+                overflow-y: auto;
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+            }
+            .map-wrapper {
+                flex: 1;
+                position: relative;
+            }
+            #map {
+                width: 100%;
+                height: 100%;
+            }
+            .right-panel {
+                width: 480px;
+                background-color: var(--bg-panel);
+                border-left: 1px solid var(--border);
+                padding: 18px;
+                overflow-y: auto;
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+            }
+        }
+
+        /* Step 1 Sidebar: "Am terenul acesta, ce pot face cu el?" */
+        .hero-question-box {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.16), rgba(2, 132, 199, 0.12));
+            border: 1px solid rgba(16, 185, 129, 0.35);
+            border-radius: 14px;
+            padding: 14px;
+        }
+        .hero-question-box h2 {
+            font-size: 0.98rem;
+            font-weight: 800;
+            color: #f8fafc;
+            margin-bottom: 5px;
+        }
+        .hero-question-box p {
+            font-size: 0.8rem;
+            color: #cbd5e1;
+            line-height: 1.45;
+            margin-bottom: 10px;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .control-group label {
+            font-size: 0.83rem;
+            font-weight: 700;
+            color: #f1f5f9;
+        }
+        .helper-hint {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+        select {
+            background-color: #0f172a;
+            color: var(--text-primary);
+            border: 1px solid rgba(148, 163, 184, 0.32);
+            padding: 11px 12px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            outline: none;
+            width: 100%;
+            min-height: 46px;
+        }
+        .choice-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .choice-btn {
+            background: #0f172a;
+            border: 1.5px solid rgba(148, 163, 184, 0.25);
+            color: #cbd5e1;
+            padding: 10px 8px;
+            border-radius: 10px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.15s ease;
+            min-height: 48px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+        }
+        .choice-btn span.sub {
+            font-size: 0.69rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+        .choice-btn.active {
+            background: rgba(16, 185, 129, 0.18);
+            border-color: var(--accent);
+            color: #ffffff;
+            box-shadow: 0 0 0 1px var(--accent);
+        }
+        .choice-btn.active span.sub {
+            color: #6ee7b7;
+        }
+
+        /* Map Elements */
+        #map {
+            background-color: #090e1a;
+        }
+        .map-floating-tip {
+            position: absolute;
+            top: 12px;
+            left: 52px;
+            right: 52px;
+            max-width: fit-content;
+            background: rgba(15, 23, 42, 0.94);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(16, 185, 129, 0.5);
+            color: #f8fafc;
+            padding: 9px 14px;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            z-index: 900;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.45);
+            pointer-events: none;
+        }
+        .legend-box {
+            position: absolute;
+            bottom: 20px;
+            left: 14px;
+            background: rgba(15, 23, 42, 0.94);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 10px 12px;
+            z-index: 900;
+        }
+        .legend-title {
+            font-size: 0.76rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        .legend-scale {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.72rem;
+            color: #cbd5e1;
+        }
+        .legend-color {
+            width: 14px;
+            height: 14px;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+
+        /* Right Panel: Direct Answer to "Ce pot să fac cu acest teren?" */
+        .card-section {
+            background-color: #0f172a;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+        }
+        .panel-section-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .tag-mini {
+            font-size: 0.72rem;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(16, 185, 129, 0.16);
+            color: #34d399;
+            font-weight: 700;
+        }
+
+
+        /* Sort/Filter Bar inside "Ce poți face cu acest teren" */
+        .sort-filter-wrapper {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .sort-filter-label {
+            font-size: 0.74rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+        }
+        .sort-pills {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+        .sort-pill-btn {
+            background: #1e293b;
+            border: 1.5px solid rgba(148, 163, 184, 0.24);
+            color: #cbd5e1;
+            padding: 8px 10px;
+            border-radius: 9px;
+            font-size: 0.76rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.16s ease;
+            min-height: 38px;
+        }
+        .sort-pill-btn:hover {
+            border-color: rgba(56, 189, 248, 0.5);
+            background: #283548;
+        }
+        .sort-pill-btn.active {
+            background: rgba(16, 185, 129, 0.18);
+            border-color: var(--accent);
+            color: #ffffff;
+            box-shadow: 0 0 0 1px var(--accent);
+        }
+        .metric-sub-badge {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: #94a3b8;
+            display: block;
+            margin-top: 1px;
+        }
+
+        /* Best Options Cards (Click a crop to test it immediately!) */
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .option-card {
+            background: rgba(30, 41, 59, 0.72);
+            border: 1.5px solid rgba(148, 163, 184, 0.18);
+            border-radius: 12px;
+            padding: 12px 14px;
+            cursor: pointer;
+            transition: all 0.18s ease;
+        }
+        .option-card:hover {
+            border-color: rgba(56, 189, 248, 0.5);
+            background: rgba(30, 41, 59, 0.95);
+        }
+        .option-card.best {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.16), rgba(30, 41, 59, 0.85));
+            border-color: rgba(16, 185, 129, 0.55);
+        }
+        .option-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+        .option-title {
+            font-size: 0.94rem;
+            font-weight: 800;
+            color: #ffffff;
+        }
+        .option-yield {
+            font-size: 0.92rem;
+            font-weight: 800;
+            color: #34d399;
+            text-align: right;
+        }
+        .option-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 6px;
+            font-size: 0.76rem;
+            color: #cbd5e1;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .risk-pill {
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.71rem;
+        }
+        .risk-low { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
+        .risk-med { background: rgba(245, 158, 11, 0.2); color: #fcd34d; }
+        .risk-high { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+
+        /* Specific Crop Check Box */
+        .verdict-hero {
+            background: rgba(30, 41, 59, 0.8);
+            border-left: 5px solid var(--accent);
+            border-radius: 10px;
+            padding: 13px;
+            margin-top: 10px;
+        }
+        .farmer-kpi-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .farmer-kpi {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.14);
+            border-radius: 10px;
+            padding: 10px;
+        }
+        .farmer-kpi-label {
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+        .farmer-kpi-val {
+            font-size: 1.02rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin-top: 2px;
+        }
+        .farmer-kpi-sub {
+            font-size: 0.7rem;
+            color: #94a3b8;
+            margin-top: 2px;
+        }
+
+
+        /* Climate Section & Crop Cycle Charts */
+        .climate-kpi-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .climate-kpi-full {
+            grid-column: 1 / -1;
+        }
+        .crop-charts-wrapper {
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .crop-cycle-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .crop-cycle-title {
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: #f8fafc;
+        }
+        .crop-cycle-window {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #38bdf8;
+            background: rgba(56, 189, 248, 0.14);
+            padding: 3px 9px;
+            border-radius: 999px;
+        }
+        .mini-chart-box {
+            background: rgba(30, 41, 59, 0.55);
+            border: 1px solid rgba(148, 163, 184, 0.14);
+            border-radius: 10px;
+            padding: 10px;
+        }
+        .mini-chart-title {
+            font-size: 0.76rem;
+            font-weight: 700;
+            color: #e2e8f0;
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .mini-chart-sub {
+            font-size: 0.68rem;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+        .mini-chart-canvas-wrap {
+            height: 155px;
+            position: relative;
+        }
+
+        /* Weather Banner */
+        .comparison-banner {
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 0.82rem;
+            line-height: 1.5;
+            margin-top: 10px;
+            border: 1px solid transparent;
+        }
+        .comparison-banner.alert {
+            background: rgba(239, 68, 68, 0.14);
+            border-color: rgba(239, 68, 68, 0.4);
+            color: #fca5a5;
+        }
+        .comparison-banner.warn {
+            background: rgba(245, 158, 11, 0.14);
+            border-color: rgba(245, 158, 11, 0.4);
+            color: #fcd34d;
+        }
+        .comparison-banner.ok {
+            background: rgba(16, 185, 129, 0.14);
+            border-color: rgba(16, 185, 129, 0.4);
+            color: #6ee7b7;
+        }
+
+        /* AI Rotation Plan Box */
+        .ai-highlight-card {
+            background: linear-gradient(180deg, rgba(16, 185, 129, 0.1) 0%, rgba(15, 23, 42, 0.98) 100%);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            border-radius: 14px;
+            padding: 16px;
+        }
+        .ai-result {
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            border-radius: 10px;
+            padding: 14px;
+            white-space: pre-wrap;
+            color: #f8fafc;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            margin-top: 10px;
+        }
+
+        /* Collapsible Technical Details */
+        details.tech-details {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 14px;
+        }
+        details.tech-details summary {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            cursor: pointer;
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        details.tech-details summary::-webkit-details-marker {
+            display: none;
+        }
+        .tech-content {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .inspector-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+            font-size: 0.78rem;
+            gap: 10px;
+        }
+        .chart-container {
+            height: 200px;
+            margin-top: 8px;
+        }
+
+        /* =========================================================
+           MOBILE RESPONSIVE DESIGN (Phones & Tablets <= 960px)
+           ========================================================= */
+        @media (max-width: 960px) {
+            body {
+                padding-bottom: 72px;
+            }
+            header {
+                padding: 10px 14px;
+            }
+            .brand-text p {
+                display: none;
+            }
+            .btn-desktop-only {
+                display: none;
+            }
+            .main-container {
+                display: flex;
+                flex-direction: column;
+                flex: 1;
+            }
+            .sidebar {
+                width: 100%;
+                background-color: var(--bg-panel);
+                padding: 14px;
+                display: flex;
+                flex-direction: column;
+                gap: 13px;
+                border-bottom: 1px solid var(--border);
+            }
+            .map-wrapper {
+                width: 100%;
+                height: 55vh;
+                min-height: 340px;
+                position: relative;
+            }
+            #map {
+                width: 100%;
+                height: 100%;
+            }
+            .map-floating-tip {
+                font-size: 0.74rem;
+                padding: 7px 12px;
+                left: 48px;
+                right: 12px;
+            }
+            .legend-box {
+                bottom: 10px;
+                left: 10px;
+                padding: 8px 10px;
+                max-width: 205px;
+            }
+            .legend-item {
+                font-size: 0.68rem;
+            }
+            .right-panel {
+                width: 100%;
+                padding: 14px;
+                display: flex;
+                flex-direction: column;
+                gap: 14px;
+                background-color: var(--bg-dark);
+            }
+
+            /* Mobile Tab Switching */
+            body[data-mobile-tab="map"] .right-panel {
+                display: none;
+            }
+            body[data-mobile-tab="advice"] .sidebar,
+            body[data-mobile-tab="advice"] .map-wrapper {
+                display: none;
+            }
+
+            /* Sticky Bottom Bar */
+            .mobile-nav {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 66px;
+                background: #0f172a;
+                border-top: 1px solid rgba(148, 163, 184, 0.25);
+                z-index: 2000;
+                box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
+            }
+            .mobile-nav-btn {
+                background: transparent;
+                border: none;
+                color: var(--text-secondary);
+                font-size: 0.84rem;
+                font-weight: 700;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 3px;
+                cursor: pointer;
+            }
+            .mobile-nav-btn.active {
+                color: #34d399;
+                background: rgba(16, 185, 129, 0.12);
+                border-top: 3px solid #10b981;
+            }
+            .nav-icon {
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body data-mobile-tab="map">
+
+<header>
+    <div class="brand">
+        <div class="brand-logo">🌱</div>
+        <div class="brand-text">
+            <h1>AgroSense Fermier</h1>
+            <p>„Am acest teren — ce pot să fac cu el?”</p>
+        </div>
+    </div>
+    <div class="header-actions">
+        <button class="btn btn-desktop-only" id="resetViewBtn">🗺️ Toată zona</button>
+        <button class="btn btn-primary btn-desktop-only" id="exportCsvBtn">📥 Descarcă tabel</button>
+    </div>
+</header>
+
+<div class="main-container">
+    <!-- Left Sidebar: Find Your Land First -->
+    <aside class="sidebar">
+        <div class="hero-question-box">
+            <h2>👋 Arată-ne unde ai terenul</h2>
+            <p>Găsește-ți parcela pe hartă sau folosește localizarea telefonului, iar noi îți spunem imediat ce culturi merg cel mai bine acolo.</p>
+            <button type="button" class="btn btn-gps" id="locateMeBtn">📍 Găsește terenul meu (GPS)</button>
+            <div id="gpsFeedback" class="helper-hint" style="margin-top:6px; display:none;"></div>
+        </div>
+
+        <div class="control-group">
+            <label for="countySelect">Sau alege județul tău:</label>
+            <select id="countySelect">
+                <option value="ALL">Toate județele (Sud și Sud-Est)</option>
+                <option value="Călărași">Călărași</option>
+                <option value="Ialomița">Ialomița</option>
+                <option value="Constanța">Constanța</option>
+                <option value="Tulcea">Tulcea</option>
+                <option value="Brăila">Brăila</option>
+                <option value="Buzău">Buzău</option>
+                <option value="București">București</option>
+                <option value="Giurgiu">Giurgiu</option>
+                <option value="Teleorman">Teleorman</option>
+                <option value="Olt">Olt</option>
+                <option value="Dolj">Dolj</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label>Ai apă / irigații pe acest teren?</label>
+            <div class="choice-grid" id="waterChoiceGrid">
+                <button type="button" class="choice-btn active" data-water="R">
+                    <span>☁️ Nu, doar din ploi</span>
+                    <span class="sub">Teren neirigat</span>
+                </button>
+                <button type="button" class="choice-btn" data-water="I">
+                    <span>💧 Da, pot iriga</span>
+                    <span class="sub">Cu sistem de irigații</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label>Ce buget de lucrări ai?</label>
+            <div class="choice-grid" id="inputChoiceGrid">
+                <button type="button" class="choice-btn active" data-input="H">
+                    <span>🚜 Îngrijire completă</span>
+                    <span class="sub">Îngrășăminte & tratamente</span>
+                </button>
+                <button type="button" class="choice-btn" data-input="L">
+                    <span>🌱 Buget redus</span>
+                    <span class="sub">Cheltuieli minime</span>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Interactive Map -->
+    <main class="map-wrapper">
+        <div class="map-floating-tip">👆 Apasă pe pătratul unde este pământul tău</div>
+        <div id="map"></div>
+        <div class="legend-box">
+            <div class="legend-title" id="legendTitle">Cât de roditor e terenul</div>
+            <div class="legend-scale" id="legendScale"></div>
+        </div>
+    </main>
+
+    <!-- Right / Mobile Panel: Direct Answer to "Am acest teren, ce pot face cu el?" -->
+    <aside class="right-panel">
+        <!-- 1. Main Answer: Best Things You Can Do With This Land -->
+        <div class="card-section">
+            <div class="panel-section-title">
+                <span>🌾 Ce poți face cu acest teren</span>
+                <span class="tag-mini" id="activeCellBadge">Niciun teren ales</span>
+            </div>
+            <p class="helper-hint" id="landIntroText">Apasă pe un pătrat de pe hartă ca să vezi ce culturi merg cel mai bine pe pământul tău.</p>
+            
+            <div class="sort-filter-wrapper">
+                <div class="sort-filter-label">Ordonează / filtrează variantele după:</div>
+                <div class="sort-pills" id="cropRankFilterGroup">
+                    <button type="button" class="sort-pill-btn active" data-rank="SIX">⭐ Indice pretabilitate</button>
+                    <button type="button" class="sort-pill-btn" data-rank="YLX">⚖️ Producție (tone/ha)</button>
+                    <button type="button" class="sort-pill-btn" data-rank="FC2">💧 Factor limitativ apă</button>
+                    <button type="button" class="sort-pill-btn" data-rank="FC1">🌡️ Factor limitativ termic</button>
+                </div>
+            </div>
+
+            <div class="options-list" id="bestOptionsList"></div>
+        </div>
+
+        <!-- 2. 4-Year Plan so the Soil Stays Healthy -->
+        <div class="ai-highlight-card">
+            <div class="panel-section-title">
+                <span>📅 Cum să rotești culturile (Plan pe 4 ani)</span>
+                <label style="font-size:0.74rem; color:#94a3b8; display:flex; align-items:center; gap:5px; cursor:pointer;">
+                    <input type="checkbox" id="autoAiOnClick" checked style="accent-color:#10b981; width:16px; height:16px;"> Automat
+                </label>
+            </div>
+            <p class="helper-hint">Dacă pui aceeași cultură an de an, scade producția. Iată ordinea recomandată pentru terenul tău:</p>
+            <button class="btn btn-primary" id="askAiBtn" style="width:100%; margin-top:10px;">✨ Calculează planul pe 4 ani</button>
+            <div class="ai-result" id="aiResult">Alege terenul pe hartă pentru a primi planul pe 4 ani...</div>
+        </div>
+
+        <!-- 3. Check Any Specific Crop on This Land -->
+        <div class="card-section">
+            <div class="panel-section-title">
+                <span>🔍 Verifică o cultură anume</span>
+            </div>
+            <div class="control-group">
+                <select id="cropSelect">
+                    <option value="maize">🌽 Porumb boabe</option>
+                    <option value="wheat">🌾 Grâu de toamnă</option>
+                    <option value="sunflower">🌻 Floarea-soarelui</option>
+                    <option value="soybean">🫘 Soia</option>
+                    <option value="alfalfa">🌿 Lucernă</option>
+                    <option value="barley">🌾 Orz</option>
+                    <option value="rapeseed">🌼 Rapiță</option>
+                    <option value="potato">🥔 Cartof</option>
+                </select>
+            </div>
+            <div id="specificCropVerdict"></div>
+        </div>
+
+        <!-- 4. Specific Climatic Data & Crop-Interval Charts -->
+        <div class="card-section">
+            <div class="panel-section-title">
+                <span>🌦️ Date climatice specifice</span>
+                <span class="tag-mini" id="nasaFetchBadge">NASA POWER</span>
+            </div>
+            <p class="helper-hint" id="climateSubtitleHint">Indicatori climatici pe ultimele 12 luni și evoluția zilnică în perioada de vegetație a culturii selectate.</p>
+            <div id="nasaPanelContent">
+                <p class="helper-hint" style="margin-top:8px;">Verificăm datele climatice din zona terenului tău...</p>
+            </div>
+        </div>
+
+        <!-- 5. Hidden Technical Details for Advanced Users -->
+        <details class="tech-details">
+            <summary>
+                <span>⚙️ Date tehnice avansate și grafic județe (opțional)</span>
+                <span>▼</span>
+            </summary>
+            <div class="tech-content">
+                <div class="control-group">
+                    <label for="indicatorSelect">Colorare hartă după indicator:</label>
+                    <select id="indicatorSelect">
+                        <option value="SIX">Calitatea terenului (Scor FAO)</option>
+                        <option value="YLX">Producția estimată (kg/ha)</option>
+                        <option value="WDE">Deficit de apă (mm/an)</option>
+                        <option value="CBD">Ziua optimă de semănat</option>
+                        <option value="CYL">Durata ciclului (zile)</option>
+                        <option value="FC2">Limitare din apă (FC2)</option>
+                        <option value="FC1">Limitare din căldură (FC1)</option>
+                    </select>
+                </div>
+
+                <div id="technicalMetricsList"></div>
+
+                <div style="display:flex; gap:8px; margin-top:4px;">
+                    <button class="btn" id="mobileResetBtn" style="flex:1;">🗺️ Toată zona</button>
+                    <button class="btn btn-primary" id="mobileExportBtn" style="flex:1;">📥 Descarcă CSV</button>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="countyChart"></canvas>
+                </div>
+            </div>
+        </details>
+    </aside>
+</div>
+
+<!-- Mobile Bottom Navigation -->
+<nav class="mobile-nav" aria-label="Meniu telefon">
+    <button type="button" class="mobile-nav-btn active" id="navMapBtn">
+        <span class="nav-icon">🗺️</span>
+        <span>1. Terenul meu</span>
+    </button>
+    <button type="button" class="mobile-nav-btn" id="navAdviceBtn">
+        <span class="nav-icon">🌾</span>
+        <span>2. Ce pot face cu el</span>
+    </button>
+</nav>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    // =========================================================================
+    // MOBILE TAB SWITCHER
+    // =========================================================================
+    function switchMobileTab(tabName) {
+        document.body.setAttribute('data-mobile-tab', tabName);
+        document.getElementById('navMapBtn').classList.toggle('active', tabName === 'map');
+        document.getElementById('navAdviceBtn').classList.toggle('active', tabName === 'advice');
+        if (tabName === 'map') {
+            setTimeout(() => map.invalidateSize(), 120);
+        } else {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    document.getElementById('navMapBtn').addEventListener('click', () => switchMobileTab('map'));
+    document.getElementById('navAdviceBtn').addEventListener('click', () => switchMobileTab('advice'));
+
+    // =========================================================================
+    // SIMPLE FARMER MANAGEMENT STATE
+    // =========================================================================
+    let selectedWater = 'R'; // 'R' = Rainfed, 'I' = Irrigated
+    let selectedInput = 'H'; // 'H' = Intensive, 'L' = Minimal
+    let selectedCropRankCriterion = 'SIX'; // 'SIX' | 'YLX' | 'FC2' | 'FC1'
+
+    document.querySelectorAll('#cropRankFilterGroup .sort-pill-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('#cropRankFilterGroup .sort-pill-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            selectedCropRankCriterion = btn.getAttribute('data-rank');
+            if (selectedCell) {
+                const cropKey = document.getElementById('cropSelect').value;
+                const mgmtKey = getCurrentMgmtKey();
+                inspectCell(selectedCell, computeCellMetrics(selectedCell, cropKey, mgmtKey));
+            }
+        });
+    });
+
+    function getCurrentMgmtKey() {
+        return `${selectedInput}${selectedWater}LM`;
+    }
+
+    document.querySelectorAll('#waterChoiceGrid .choice-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('#waterChoiceGrid .choice-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            selectedWater = btn.getAttribute('data-water');
+            if (selectedCell) selectAndAnalyzeCell(selectedCell, false);
+            else renderDashboard(false);
+        });
+    });
+
+    document.querySelectorAll('#inputChoiceGrid .choice-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('#inputChoiceGrid .choice-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            selectedInput = btn.getAttribute('data-input');
+            if (selectedCell) selectAndAnalyzeCell(selectedCell, false);
+            else renderDashboard(false);
+        });
+    });
+
+    // =========================================================================
+    // LIVE FAO GAEZ v4 ENGINE
+    // =========================================================================
+    const MGMT_TO_GAEZ_CODE = {
+        HRLM: { water: "R", input: "H", suffix: "hr" },
+        HILM: { water: "I", input: "H", suffix: "hi" },
+        LRLM: { water: "R", input: "L", suffix: "lr" },
+        LILM: { water: "I", input: "L", suffix: "li" }
+    };
+
+    const gaezLiveCache = {};
+
+    async function querySingleGaezIndicator(lat, lng, theme, indicatorCode, cropCode, mgmtKey) {
+        const mCfg = MGMT_TO_GAEZ_CODE[mgmtKey] || MGMT_TO_GAEZ_CODE.HRLM;
+        const layerName = `gaez4:${theme.toLowerCase()}_cruts32_hist_8110_${mCfg.suffix}_${cropCode}_${indicatorCode.toLowerCase()}`;
+
+        const delta = 0.0416667;
+        const bbox = `${lat - delta},${lng - delta},${lat + delta},${lng + delta}`;
+        const wmsParams = new URLSearchParams({
+            SERVICE: "WMS",
+            VERSION: "1.3.0",
+            REQUEST: "GetFeatureInfo",
+            LAYERS: layerName,
+            QUERY_LAYERS: layerName,
+            CRS: "EPSG:4326",
+            BBOX: bbox,
+            WIDTH: "3",
+            HEIGHT: "3",
+            I: "1",
+            J: "1",
+            INFO_FORMAT: "application/json"
+        });
+
+        const wmsUrl = `https://data.apps.fao.org/map/gsrv/gsrv1/gaez4/wms?${wmsParams.toString()}`;
+
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 4500);
+            const res = await fetch(wmsUrl, { signal: controller.signal });
+            clearTimeout(timeoutId);
+
+            if (res.ok) {
+                const json = await res.json();
+                if (json && Array.isArray(json.features) && json.features.length > 0) {
+                    const props = json.features[0].properties || {};
+                    const rawVal = props.GRAY_INDEX ?? props.Band1 ?? props.value ?? Object.values(props).find(v => typeof v === 'number');
+                    if (typeof rawVal === 'number' && !Number.isNaN(rawVal) && rawVal > -9000) {
+                        return rawVal;
+                    }
+                }
+            }
+        } catch (_) {}
+
+        const serviceFolder = theme === "RES05" ? "RES05_Suitability_Attainable_Yield" : "RES02_Agro_Climatic_Potential_Yield";
+        const serviceName = `${theme}_CRUTS32_Hist_8110_${mCfg.water}_${mCfg.input}_${cropCode.toUpperCase()}_${indicatorCode}`;
+        const arcgisIdentifyUrl = `https://gaez.fao.org/server/rest/services/${serviceFolder}/${serviceName}/ImageServer/identify?geometry=${encodeURIComponent(JSON.stringify({ x: lng, y: lat, spatialReference: { wkid: 4326 } }))}&geometryType=esriGeometryPoint&returnGeometry=false&returnCatalogItems=false&f=json`;
+
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 4500);
+            const res = await fetch(arcgisIdentifyUrl, { signal: controller.signal });
+            clearTimeout(timeoutId);
+
+            if (res.ok) {
+                const json = await res.json();
+                if (json && json.value !== undefined && json.value !== "NoData") {
+                    const num = Number(json.value);
+                    if (!Number.isNaN(num) && num > -9000) {
+                        return num;
+                    }
+                }
+            }
+        } catch (_) {}
+
+        return null;
+    }
+
+    async function fetchLiveGaezForCell(cell, cropKey, mgmtKey) {
+        const cacheKey = `${cell.id}_${cropKey}_${mgmtKey}`;
+        if (gaezLiveCache[cacheKey]) {
+            return gaezLiveCache[cacheKey];
+        }
+
+        const crop = CROP_PARAMS[cropKey];
+        const indicatorSpecs = [
+            { key: "six", theme: "RES05", code: "SIX" },
+            { key: "ylx", theme: "RES05", code: "YLX" },
+            { key: "wde", theme: "RES02", code: "WDE" },
+            { key: "cbd", theme: "RES02", code: "CBD" },
+            { key: "cyl", theme: "RES02", code: "CYL" },
+            { key: "fc2", theme: "RES02", code: "FC2" },
+            { key: "fc1", theme: "RES02", code: "FC1" }
+        ];
+
+        const results = await Promise.all(
+            indicatorSpecs.map(spec =>
+                querySingleGaezIndicator(cell.lat, cell.lng, spec.theme, spec.code, crop.code, mgmtKey)
+            )
+        );
+
+        const parsed = {};
+        let liveHits = 0;
+        indicatorSpecs.forEach((spec, idx) => {
+            let val = results[idx];
+            if (val !== null) {
+                if ((spec.key === "fc1" || spec.key === "fc2") && val > 1.0) {
+                    val = val > 100 ? val / 10000 : val / 100;
+                }
+                if (spec.key === "cbd" || spec.key === "cyl" || spec.key === "six" || spec.key === "ylx" || spec.key === "wde") {
+                    val = Math.round(val);
+                } else {
+                    val = Number(Math.min(1.0, Math.max(0.0, val)).toFixed(2));
+                }
+                parsed[spec.key] = val;
+                liveHits++;
+            }
+        });
+
+        const payload = { liveHits, totalRequested: indicatorSpecs.length, values: parsed };
+        gaezLiveCache[cacheKey] = payload;
+        return payload;
+    }
+
+    // =========================================================================
+    // CROPS WITH PRACTICAL ROMANIAN FARMER ADVICE
+    // =========================================================================
+    const CROP_PARAMS = {
+        maize:     { code: "maiz", emoji: "🌽", name: "Porumb boabe", role: "Cultură de bază (prășitoare)", tip: "Aduce producție mare, dar cere apă vara.", baseSix: 6800, maxYield: 11800, waterNeed: 410, baseCbd: 108, baseCyl: 138, waterSens: 0.34, thermBase: 0.91 },
+        wheat:     { code: "whea", emoji: "🌾", name: "Grâu de toamnă", role: "Cultură sigură (păioasă)", tip: "Folosește bine ploile din toamnă-primăvară și scapă de arșița din iulie.", baseSix: 7400, maxYield: 8600, waterNeed: 290, baseCbd: 282, baseCyl: 268, waterSens: 0.18, thermBase: 0.94 },
+        sunflower: { code: "sunf", emoji: "🌻", name: "Floarea-soarelui", role: "Rezistentă la secetă", tip: "Rădăcina adâncă caută apa din sol; bună în zone mai uscate.", baseSix: 7200, maxYield: 4200, waterNeed: 320, baseCbd: 102, baseCyl: 128, waterSens: 0.22, thermBase: 0.93 },
+        soybean:   { code: "soyb", emoji: "🫘", name: "Soia", role: "Îmbogățește pământul", tip: "Lasă azot natural în sol pentru cultura următoare; preferă teren irigat.", baseSix: 6100, maxYield: 4100, waterNeed: 440, baseCbd: 115, baseCyl: 132, waterSens: 0.38, thermBase: 0.89 },
+        alfalfa:   { code: "alfa", emoji: "🌿", name: "Lucernă", role: "Furaj & refacere sol", tip: "Excelentă pentru fân/furaj și pentru refacerea structurii pământului.", baseSix: 6900, maxYield: 12500, waterNeed: 480, baseCbd: 88,  baseCyl: 195, waterSens: 0.35, thermBase: 0.92 },
+        barley:    { code: "barl", emoji: "🌾", name: "Orz", role: "Recoltare timpurie", tip: "Se coace mai devreme decât grâul și evită seceta de vară.", baseSix: 7300, maxYield: 7900, waterNeed: 270, baseCbd: 276, baseCyl: 256, waterSens: 0.16, thermBase: 0.95 },
+        rapeseed:  { code: "rape", emoji: "🌼", name: "Rapiță", role: "Cultură rentabilă de toamnă", tip: "Eliberează terenul devreme vara și lasă pământul afânat.", baseSix: 6700, maxYield: 4500, waterNeed: 310, baseCbd: 248, baseCyl: 284, waterSens: 0.24, thermBase: 0.90 },
+        potato:    { code: "pota", emoji: "🥔", name: "Cartof", role: "Cultură intensivă", tip: "Cere sol afânat și udări regulate.", baseSix: 5400, maxYield: 36000, waterNeed: 460, baseCbd: 95,  baseCyl: 118, waterSens: 0.42, thermBase: 0.85 }
+    };
+
+    const MGMT_PARAMS = {
+        HRLM: { label: "Fără irigații, îngrijire completă", sixMult: 0.86, yieldMult: 0.82, wdeMult: 1.00 },
+        HILM: { label: "Cu irigații, îngrijire completă", sixMult: 1.18, yieldMult: 1.24, wdeMult: 0.15 },
+        LRLM: { label: "Fără irigații, buget redus", sixMult: 0.54, yieldMult: 0.48, wdeMult: 1.00 },
+        LILM: { label: "Cu irigații, buget redus", sixMult: 0.78, yieldMult: 0.74, wdeMult: 0.18 }
+    };
+
+    const COUNTIES = {
+        "Călărași":  { center: [44.28, 27.15], radius: 0.55, soilFactor: 1.12, aridFactor: 1.18 },
+        "Ialomița":  { center: [44.65, 27.35], radius: 0.52, soilFactor: 1.14, aridFactor: 1.15 },
+        "Constanța": { center: [44.25, 28.25], radius: 0.65, soilFactor: 0.96, aridFactor: 1.32 },
+        "Tulcea":    { center: [45.05, 28.75], radius: 0.65, soilFactor: 0.84, aridFactor: 1.28 },
+        "Brăila":    { center: [45.15, 27.68], radius: 0.48, soilFactor: 1.08, aridFactor: 1.20 },
+        "Buzău":     { center: [45.22, 26.80], radius: 0.52, soilFactor: 0.98, aridFactor: 1.02 },
+        "București": { center: [44.4268, 26.1025], radius: 0.24, soilFactor: 1.00, aridFactor: 1.10 },
+        "Giurgiu":   { center: [44.12, 25.95], radius: 0.46, soilFactor: 1.09, aridFactor: 1.08 },
+        "Teleorman": { center: [44.05, 25.25], radius: 0.52, soilFactor: 1.10, aridFactor: 1.10 },
+        "Olt":       { center: [44.28, 24.42], radius: 0.54, soilFactor: 1.06, aridFactor: 1.05 },
+        "Dolj":      { center: [44.18, 23.72], radius: 0.58, soilFactor: 1.03, aridFactor: 1.12 }
+    };
+
+    function seededRandom(seed) {
+        let x = Math.sin(seed) * 10000;
+        return x - Math.floor(x);
+    }
+
+    const GRID_STEP = 0.10;
+    const gridCells = [];
+    let cellIdCounter = 1;
+
+    for (let lat = 43.65; lat <= 45.55; lat = Number((lat + GRID_STEP).toFixed(4))) {
+        for (let lng = 23.15; lng <= 29.25; lng = Number((lng + GRID_STEP).toFixed(4))) {
+            let nearestCounty = null;
+            let minDist = Infinity;
+
+            Object.entries(COUNTIES).forEach(([cName, cfg]) => {
+                const dLat = lat - cfg.center[0];
+                const dLng = (lng - cfg.center[1]) * 0.72;
+                const dist = Math.sqrt(dLat * dLat + dLng * dLng);
+                if (dist <= cfg.radius && dist < minDist) {
+                    minDist = dist;
+                    nearestCounty = cName;
+                }
+            });
+
+            if (nearestCounty) {
+                const cfg = COUNTIES[nearestCounty];
+                const noise = seededRandom(Math.round(lat * 1000) * 31 + Math.round(lng * 1000) * 17);
+                gridCells.push({
+                    id: `ZONA-${String(cellIdCounter++).padStart(3, '0')}`,
+                    county: nearestCounty,
+                    lat: Number(lat.toFixed(4)),
+                    lng: Number(lng.toFixed(4)),
+                    bounds: [
+                        [Number((lat - GRID_STEP / 2).toFixed(5)), Number((lng - GRID_STEP / 2).toFixed(5))],
+                        [Number((lat + GRID_STEP / 2).toFixed(5)), Number((lng + GRID_STEP / 2).toFixed(5))]
+                    ],
+                    localQuality: 0.80 + noise * 0.40,
+                    soilFactor: cfg.soilFactor,
+                    aridFactor: cfg.aridFactor
+                });
+            }
+        }
+    }
+
+    function dayOfYearToRomanianDate(doy) {
+        const monthsRo = ['Ianuarie', 'Februarie', 'Martie', 'Aprilie', 'Mai', 'Iunie', 'Iulie', 'August', 'Septembrie', 'Octombrie', 'Noiembrie', 'Decembrie'];
+        const date = new Date(Date.UTC(2025, 0, 1));
+        date.setUTCDate(doy);
+        return `${date.getUTCDate()} ${monthsRo[date.getUTCMonth()]}`;
+    }
+
+    function classifyFarmerSuitability(six) {
+        if (six >= 7500) {
+            return {
+                badgeLabel: '⭐ Foarte potrivit aici',
+                riskLabel: 'Risc mic',
+                riskClass: 'risk-low',
+                farmerVerdict: 'Teren foarte bun pentru această cultură! Ai șanse mari la o recoltă bogată.',
+                classColor: '#10b981'
+            };
+        }
+        if (six >= 5500) {
+            return {
+                badgeLabel: '👍 Potrivit aici',
+                riskLabel: 'Risc scăzut-mediu',
+                riskClass: 'risk-low',
+                farmerVerdict: 'Cultura merge bine pe acest teren dacă faci lucrările la timp.',
+                classColor: '#38bdf8'
+            };
+        }
+        if (six < 3500) {
+            return {
+                badgeLabel: '⛔ Nerecomandat aici',
+                riskLabel: 'Risc mare de pierdere',
+                riskClass: 'risk-high',
+                farmerVerdict: 'Nu merită riscul aici (sol slab sau lipsă mare de apă). Alege o opțiune din lista de sus.',
+                classColor: '#ef4444'
+            };
+        }
+        return {
+            badgeLabel: '⚠️ Merge, dar cu risc',
+            riskLabel: 'Risc moderat de secetă',
+            riskClass: 'risk-med',
+            farmerVerdict: 'Se poate cultiva, dar recolta depinde mult de ploi sau de irigații.',
+            classColor: '#f59e0b'
+        };
+    }
+
+    function computeCellMetrics(cell, cropKey, mgmtKey) {
+        const crop = CROP_PARAMS[cropKey];
+        const mgmt = MGMT_PARAMS[mgmtKey];
+
+        let rawSix = crop.baseSix * cell.soilFactor * cell.localQuality * mgmt.sixMult;
+        if (mgmtKey.includes('R')) {
+            rawSix *= (1.15 - (cell.aridFactor - 1.0) * 0.65);
+        }
+        let six = Math.min(9850, Math.max(850, Math.round(rawSix)));
+        let ylx = Math.round((six / 10000) * crop.maxYield * (mgmtKey.includes('H') ? 1.04 : 0.92));
+        let wde = Math.round(crop.waterNeed * cell.aridFactor * mgmt.wdeMult * (1.15 - cell.localQuality * 0.25));
+
+        const latShift = Math.round((cell.lat - 44.3) * 4.5);
+        let cbd = Math.min(365, Math.max(1, crop.baseCbd + latShift + Math.round((1.0 - cell.localQuality) * 6)));
+        let cyl = Math.round(crop.baseCyl + (cell.lat - 44.3) * 5.0 - (cell.aridFactor - 1.1) * 14.0);
+
+        const isIrrigated = mgmtKey.includes('I');
+        const rawFc2 = isIrrigated
+            ? Math.min(0.99, 0.94 + cell.localQuality * 0.04)
+            : 1.0 - crop.waterSens * (cell.aridFactor - 0.82) * (1.18 - cell.localQuality * 0.22);
+        let fc2 = Number(Math.min(0.99, Math.max(0.35, rawFc2)).toFixed(2));
+
+        const thermAdj = (44.5 - cell.lat) * (['maize', 'sunflower', 'soybean'].includes(cropKey) ? 0.025 : -0.015);
+        let fc1 = Number(Math.min(0.99, Math.max(0.65, crop.thermBase + thermAdj + (cell.localQuality - 1.0) * 0.06)).toFixed(2));
+
+        const cacheKey = `${cell.id}_${cropKey}_${mgmtKey}`;
+        const cached = gaezLiveCache[cacheKey];
+        let isLiveGaez = false;
+        let liveHits = 0;
+
+        if (cached && cached.liveHits > 0) {
+            isLiveGaez = true;
+            liveHits = cached.liveHits;
+            const v = cached.values;
+            if (v.six !== undefined) six = v.six;
+            if (v.ylx !== undefined) ylx = v.ylx;
+            if (v.wde !== undefined) wde = v.wde;
+            if (v.cbd !== undefined) cbd = v.cbd;
+            if (v.cyl !== undefined) cyl = v.cyl;
+            if (v.fc2 !== undefined) fc2 = v.fc2;
+            if (v.fc1 !== undefined) fc1 = v.fc1;
+        }
+
+        const suit = classifyFarmerSuitability(six);
+        return { six, ylx, wde, cbd, cyl, fc2, fc1, ...suit, isLiveGaez, liveHits };
+    }
+
+    function getMetricValue(metrics, indicator) {
+        switch (indicator) {
+            case 'SIX': return metrics.six;
+            case 'YLX': return metrics.ylx;
+            case 'WDE': return metrics.wde;
+            case 'CBD': return metrics.cbd;
+            case 'CYL': return metrics.cyl;
+            case 'FC2': return metrics.fc2;
+            case 'FC1': return metrics.fc1;
+            default:    return metrics.six;
+        }
+    }
+
+    function getColor(val, indicator, cropKey) {
+        if (indicator === 'SIX') {
+            if (val >= 8000) return '#047857';
+            if (val >= 6500) return '#10b981';
+            if (val >= 5000) return '#84cc16';
+            if (val >= 3500) return '#facc15';
+            return '#f97316';
+        } else if (indicator === 'YLX') {
+            const maxY = CROP_PARAMS[cropKey].maxYield;
+            const ratio = val / maxY;
+            if (ratio >= 0.80) return '#1d4ed8';
+            if (ratio >= 0.65) return '#0284c7';
+            if (ratio >= 0.50) return '#06b6d4';
+            if (ratio >= 0.35) return '#38bdf8';
+            return '#93c5fd';
+        } else if (indicator === 'WDE') {
+            if (val >= 450) return '#b91c1c';
+            if (val >= 350) return '#ea580c';
+            if (val >= 250) return '#f59e0b';
+            if (val >= 120) return '#fde047';
+            return '#34d399';
+        } else if (indicator === 'CBD') {
+            if (val <= 95)  return '#34d399';
+            if (val <= 110) return '#38bdf8';
+            if (val <= 125) return '#0284c7';
+            if (val <= 265) return '#f59e0b';
+            return '#8b5cf6';
+        } else if (indicator === 'CYL') {
+            if (val >= 260) return '#1d4ed8';
+            if (val >= 190) return '#0284c7';
+            if (val >= 135) return '#10b981';
+            return '#f59e0b';
+        } else {
+            if (val >= 0.94) return '#047857';
+            if (val >= 0.89) return '#10b981';
+            if (val >= 0.83) return '#facc15';
+            if (val >= 0.76) return '#f97316';
+            return '#ef4444';
+        }
+    }
+
+    // Initialize Leaflet Map
+    const map = L.map('map', { zoomControl: true }).setView([44.52, 26.55], 8);
+
+    const baseLayers = {
+        "Hartă drumuri și sate": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri', maxZoom: 19
+        }),
+        "Vedere din satelit": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri', maxZoom: 18
+        })
+    };
+
+    baseLayers["Hartă drumuri și sate"].addTo(map);
+    L.control.layers(baseLayers, null, { position: 'topright' }).addTo(map);
+
+    const rasterLayerGroup = L.layerGroup().addTo(map);
+    let userLocationMarker = null;
+    let selectedCell = null;
+    let lastNasaAnalysis = null;
+    let countyChartInstance = null;
+    const nasaCache = {};
+
+    // =========================================================================
+    // GPS "GĂSEȘTE TERENUL MEU" BUTTON
+    // =========================================================================
+    document.getElementById('locateMeBtn').addEventListener('click', () => {
+        const fb = document.getElementById('gpsFeedback');
+        fb.style.display = 'block';
+        if (!navigator.geolocation) {
+            fb.textContent = 'Telefonul sau browserul nu permite localizarea GPS. Alege județul din listă.';
+            return;
+        }
+        fb.textContent = '⏳ Căutăm poziția ta GPS...';
+
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                const uLat = pos.coords.latitude;
+                const uLng = pos.coords.longitude;
+
+                if (userLocationMarker) map.removeLayer(userLocationMarker);
+                userLocationMarker = L.circleMarker([uLat, uLng], {
+                    radius: 8,
+                    fillColor: '#38bdf8',
+                    color: '#ffffff',
+                    weight: 2.5,
+                    fillOpacity: 1
+                }).addTo(map).bindPopup('📍 Poziția ta actuală').openPopup();
+
+                // Find nearest monitored grid cell
+                let closest = null;
+                let bestDist = Infinity;
+                gridCells.forEach(c => {
+                    const dLat = c.lat - uLat;
+                    const dLng = (c.lng - uLng) * 0.72;
+                    const d = Math.hypot(dLat, dLng);
+                    if (d < bestDist) {
+                        bestDist = d;
+                        closest = c;
+                    }
+                });
+
+                if (closest && bestDist <= 0.45) {
+                    fb.textContent = `✅ Te-am localizat în jud. ${closest.county}!`;
+                    document.getElementById('countySelect').value = closest.county;
+                    map.flyTo([closest.lat, closest.lng], 10, { duration: 0.8 });
+                    selectAndAnalyzeCell(closest, true);
+                } else {
+                    fb.textContent = '📍 Te-am găsit pe hartă! Ești în afara zonei de sud monitorizate — apasă pe orice pătrat colorat.';
+                    map.flyTo([uLat, uLng], 9, { duration: 0.8 });
+                }
+            },
+            () => {
+                fb.textContent = 'Nu am primit permisiunea GPS. Alege județul tău din lista de mai jos.';
+            },
+            { enableHighAccuracy: true, timeout: 8000 }
+        );
+    });
+
+    function updateLegend(indicator, cropKey) {
+        const titleEl = document.getElementById('legendTitle');
+        const scaleEl = document.getElementById('legendScale');
+        let items = [];
+
+        if (indicator === 'SIX') {
+            titleEl.textContent = 'Cât de roditor e terenul';
+            items = [
+                { color: '#047857', label: 'Verde închis — Foarte roditor' },
+                { color: '#10b981', label: 'Verde — Bun' },
+                { color: '#84cc16', label: 'Verde deschis — Acceptabil' },
+                { color: '#facc15', label: 'Galben — Risc de secetă' },
+                { color: '#f97316', label: 'Portocaliu — Slab / Nerecomandat' }
+            ];
+        } else {
+            titleEl.textContent = 'Scară indicator';
+            items = [
+                { color: '#047857', label: 'Optim' },
+                { color: '#10b981', label: 'Bun' },
+                { color: '#facc15', label: 'Moderat' },
+                { color: '#ef4444', label: 'Risc ridicat' }
+            ];
+        }
+
+        scaleEl.innerHTML = items.map(i => `
+            <div class="legend-item">
+                <span class="legend-color" style="background:${i.color}"></span>
+                <span>${i.label}</span>
+            </div>
+        `).join('');
+    }
+
+    function inspectCell(cell, metrics) {
+        const bestOptionsList = document.getElementById('bestOptionsList');
+        const specificVerdictEl = document.getElementById('specificCropVerdict');
+        const techList = document.getElementById('technicalMetricsList');
+        const cropKey = document.getElementById('cropSelect').value;
+        const mgmtKey = getCurrentMgmtKey();
+        const crop = CROP_PARAMS[cropKey];
+        const tonsPerHa = (metrics.ylx / 1000).toFixed(1);
+        const sowingDateRo = dayOfYearToRomanianDate(metrics.cbd);
+
+        document.getElementById('activeCellBadge').textContent = `Jud. ${cell.county} (${cell.lat.toFixed(2)}°N, ${cell.lng.toFixed(2)}°E)`;
+        document.getElementById('landIntroText').innerHTML = `Pe terenul ales din <strong>județul ${cell.county}</strong> (${MGMT_PARAMS[mgmtKey].label.toLowerCase()}), cele mai bune variante sunt:`;
+
+        // Rank all 8 crops according to the selected farmer filter
+        const rankedCrops = Object.entries(CROP_PARAMS).map(([k, cfg]) => {
+            const m = computeCellMetrics(cell, k, mgmtKey);
+            return { key: k, cfg, m };
+        }).sort((a, b) => {
+            if (selectedCropRankCriterion === 'YLX') return b.m.ylx - a.m.ylx;
+            if (selectedCropRankCriterion === 'FC2') return b.m.fc2 - a.m.fc2;
+            if (selectedCropRankCriterion === 'FC1') return b.m.fc1 - a.m.fc1;
+            return b.m.six - a.m.six; // default 'SIX'
+        });
+
+        bestOptionsList.innerHTML = rankedCrops.slice(0, 4).map((item, idx) => {
+            const medal = idx === 0 ? '🥇 Varianta #1:' : idx === 1 ? '🥈 Varianta #2:' : idx === 2 ? '🥉 Varianta #3:' : '4.';
+            
+            // Primary & secondary metric readout based on active filter
+            let primaryReadout = `Scor ${item.m.six.toLocaleString('ro-RO')} / 10.000`;
+            let secondaryReadout = `~${(item.m.ylx / 1000).toFixed(1)} tone/ha`;
+
+            if (selectedCropRankCriterion === 'YLX') {
+                primaryReadout = `~${(item.m.ylx / 1000).toFixed(1)} tone/ha`;
+                secondaryReadout = `Pretabilitate: ${Math.round(item.m.six / 100)}%`;
+            } else if (selectedCropRankCriterion === 'FC2') {
+                const waterPct = Math.round(item.m.fc2 * 100);
+                primaryReadout = `Apă: ${item.m.fc2.toFixed(2)} (${waterPct}%)`;
+                secondaryReadout = `~${(item.m.ylx / 1000).toFixed(1)} tone/ha`;
+            } else if (selectedCropRankCriterion === 'FC1') {
+                const thermPct = Math.round(item.m.fc1 * 100);
+                primaryReadout = `Termic: ${item.m.fc1.toFixed(2)} (${thermPct}%)`;
+                secondaryReadout = `~${(item.m.ylx / 1000).toFixed(1)} tone/ha`;
+            } else {
+                const suitPct = Math.round(item.m.six / 100);
+                primaryReadout = `Pretabilitate: ${suitPct}%`;
+                secondaryReadout = `~${(item.m.ylx / 1000).toFixed(1)} tone/ha`;
+            }
+
+            return `
+                <div class="option-card ${idx === 0 ? 'best' : ''}" onclick="document.getElementById('cropSelect').value='${item.key}'; selectAndAnalyzeCell(selectedCell, false);">
+                    <div class="option-header">
+                        <div class="option-title">${medal} ${item.cfg.emoji} ${item.cfg.name}</div>
+                        <div class="option-yield">
+                            ${primaryReadout}
+                            <span class="metric-sub-badge">${secondaryReadout}</span>
+                        </div>
+                    </div>
+                    <div class="option-meta">
+                        <span>${item.cfg.tip}</span>
+                        <span class="risk-pill ${item.m.riskClass}">${item.m.riskLabel}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        // Specific Crop Check Box
+        specificVerdictEl.innerHTML = `
+            <div class="verdict-hero" style="border-left-color:${metrics.classColor}">
+                <div style="font-weight:800; font-size:0.84rem; color:${metrics.classColor}; margin-bottom:4px;">
+                    ${metrics.badgeLabel}
+                </div>
+                <div style="font-size:0.84rem; line-height:1.45; color:#f8fafc;">
+                    ${metrics.farmerVerdict}
+                </div>
+            </div>
+
+            <div class="farmer-kpi-grid">
+                <div class="farmer-kpi">
+                    <div class="farmer-kpi-label">⚖️ Cât poți recolta</div>
+                    <div class="farmer-kpi-val" style="color:#34d399;">~${tonsPerHa} tone / ha</div>
+                    <div class="farmer-kpi-sub">${metrics.ylx.toLocaleString('ro-RO')} kg la hectar</div>
+                </div>
+                <div class="farmer-kpi">
+                    <div class="farmer-kpi-label">📅 Perioada de semănat</div>
+                    <div class="farmer-kpi-val" style="color:#38bdf8;">~${sowingDateRo}</div>
+                    <div class="farmer-kpi-sub">Recoltare după ~${metrics.cyl} zile</div>
+                </div>
+            </div>
+        `;
+
+        // Technical details (hidden inside <details>)
+        techList.innerHTML = `
+            <div class="inspector-row"><span>Cod zonă & Coordonate:</span><strong>${cell.id} (${cell.lat}°N, ${cell.lng}°E)</strong></div>
+            <div class="inspector-row"><span>Indice pretabilitate FAO (RES05-SIX):</span><strong>${metrics.six.toLocaleString('ro-RO')} / 10.000</strong></div>
+            <div class="inspector-row"><span>Producție potențială (RES05-YLX):</span><strong>${metrics.ylx.toLocaleString('ro-RO')} kg/ha</strong></div>
+            <div class="inspector-row"><span>Deficit hidric anual (RES02-WDE):</span><strong>${metrics.wde} mm/an</strong></div>
+            <div class="inspector-row"><span>Ziua semănatului (RES02-CBD):</span><strong>Ziua ${metrics.cbd} (${sowingDateRo})</strong></div>
+            <div class="inspector-row"><span>Durata ciclului (RES02-CYL):</span><strong>${metrics.cyl} zile</strong></div>
+            <div class="inspector-row"><span>Factor limitativ apă (RES02-FC2):</span><strong>${metrics.fc2.toFixed(2)}</strong></div>
+            <div class="inspector-row"><span>Factor limitativ termic (RES02-FC1):</span><strong>${metrics.fc1.toFixed(2)}</strong></div>
+        `;
+    }
+
+    function formatNasaDate(dateObj) {
+        const y = dateObj.getFullYear();
+        const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const d = String(dateObj.getDate()).padStart(2, '0');
+        return `${y}${m}${d}`;
+    }
+
+    let tempCycleChartInstance = null;
+    let precipCycleChartInstance = null;
+    let soilCycleChartInstance = null;
+
+    function getDayOfYear(dateObj) {
+        const start = new Date(Date.UTC(dateObj.getUTCFullYear(), 0, 0));
+        const diff = dateObj - start;
+        return Math.floor(diff / (1000 * 60 * 60 * 24));
+    }
+
+    function isDoyInCropCycle(doy, cbd, cyl) {
+        const endDoy = cbd + cyl;
+        if (endDoy <= 365) {
+            return doy >= cbd && doy <= endDoy;
+        } else {
+            // Overwintering crops (e.g., wheat, barley, rapeseed: autumn -> next summer)
+            const wrappedEnd = endDoy - 365;
+            return doy >= cbd || doy <= wrappedEnd;
+        }
+    }
+
+    function formatShortRoDate(yyyymmdd) {
+        const monthsShort = ['Ian', 'Feb', 'Mar', 'Apr', 'Mai', 'Iun', 'Iul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const m = parseInt(yyyymmdd.slice(4, 6), 10) - 1;
+        const d = parseInt(yyyymmdd.slice(6, 8), 10);
+        return `${d} ${monthsShort[m]}`;
+    }
+
+    function renderCropIntervalCharts(dailyRecords, cropName, gaezMetrics) {
+        if (tempCycleChartInstance) { tempCycleChartInstance.destroy(); tempCycleChartInstance = null; }
+        if (precipCycleChartInstance) { precipCycleChartInstance.destroy(); precipCycleChartInstance = null; }
+        if (soilCycleChartInstance) { soilCycleChartInstance.destroy(); soilCycleChartInstance = null; }
+
+        const cbd = gaezMetrics.cbd;
+        const cyl = gaezMetrics.cyl;
+
+        // Filter daily records belonging to the selected crop's growing cycle (CBD -> CBD + CYL)
+        let cycleDays = dailyRecords.filter(r => isDoyInCropCycle(r.doy, cbd, cyl));
+        if (cycleDays.length < 14) {
+            cycleDays = dailyRecords;
+        }
+
+        const labels = cycleDays.map(r => r.label);
+        const tmaxSeries = cycleDays.map(r => r.tmax);
+        const tminSeries = cycleDays.map(r => r.tmin);
+        const tmeanSeries = cycleDays.map(r => r.tmean);
+
+        // 7-day moving average for GWETROOT * 100 (%)
+        const soilPctSeries = cycleDays.map((_, idx, arr) => {
+            const startIdx = Math.max(0, idx - 6);
+            let sum = 0;
+            let count = 0;
+            for (let j = startIdx; j <= idx; j++) {
+                if (arr[j].gwetPct !== null) {
+                    sum += arr[j].gwetPct;
+                    count++;
+                }
+            }
+            return count > 0 ? Number((sum / count).toFixed(1)) : null;
+        });
+
+        // Weekly precipitation sums (mm)
+        const weeklyLabels = [];
+        const weeklyPrecipSums = [];
+        for (let i = 0; i < cycleDays.length; i += 7) {
+            const chunk = cycleDays.slice(i, i + 7);
+            const sumMm = chunk.reduce((acc, item) => acc + item.precip, 0);
+            const lbl = chunk.length > 1
+                ? `${chunk[0].label}–${chunk[chunk.length - 1].label}`
+                : chunk[0].label;
+            weeklyLabels.push(lbl);
+            weeklyPrecipSums.push(Number(sumMm.toFixed(1)));
+        }
+
+        // Chart 1: Temperatura aerului la 2 m (T2M_MAX, T2M_MIN, T2M)
+        const ctx1 = document.getElementById('tempCycleChart');
+        if (ctx1) {
+            tempCycleChartInstance = new Chart(ctx1.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        {
+                            label: 'Maximă (T2M_MAX)',
+                            data: tmaxSeries,
+                            borderColor: '#ef4444',
+                            backgroundColor: 'transparent',
+                            borderWidth: 1.6,
+                            pointRadius: 0,
+                            tension: 0.25
+                        },
+                        {
+                            label: 'Medie (T2M)',
+                            data: tmeanSeries,
+                            borderColor: '#f59e0b',
+                            backgroundColor: 'transparent',
+                            borderWidth: 1.8,
+                            pointRadius: 0,
+                            tension: 0.25
+                        },
+                        {
+                            label: 'Minimă (T2M_MIN)',
+                            data: tminSeries,
+                            borderColor: '#38bdf8',
+                            backgroundColor: 'transparent',
+                            borderWidth: 1.6,
+                            pointRadius: 0,
+                            tension: 0.25
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: { color: '#cbd5e1', boxWidth: 10, font: { size: 10 } }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#94a3b8', font: { size: 9 }, maxTicksLimit: 7 }
+                        },
+                        y: {
+                            grid: { color: 'rgba(148,163,184,0.12)' },
+                            ticks: { color: '#94a3b8', font: { size: 9 }, callback: v => `${v}°C` }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Chart 2: Precipitațiile (Sume săptămânale PRECTOTCORR în mm)
+        const ctx2 = document.getElementById('precipCycleChart');
+        if (ctx2) {
+            precipCycleChartInstance = new Chart(ctx2.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: weeklyLabels,
+                    datasets: [{
+                        label: 'Precipitații săptămânale (mm)',
+                        data: weeklyPrecipSums,
+                        backgroundColor: '#0284c7',
+                        hoverBackgroundColor: '#38bdf8',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#94a3b8', font: { size: 9 }, maxTicksLimit: 6 }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(148,163,184,0.12)' },
+                            ticks: { color: '#94a3b8', font: { size: 9 }, callback: v => `${v} mm` }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Chart 3: Saturația relativă modelată a solului (GWETROOT * 100, medie mobilă 7 zile)
+        const ctx3 = document.getElementById('soilCycleChart');
+        if (ctx3) {
+            soilCycleChartInstance = new Chart(ctx3.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Umiditate sol (%)',
+                        data: soilPctSeries,
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.16)',
+                        fill: true,
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#94a3b8', font: { size: 9 }, maxTicksLimit: 7 }
+                        },
+                        y: {
+                            min: 0,
+                            max: 100,
+                            grid: { color: 'rgba(148,163,184,0.12)' },
+                            ticks: { color: '#94a3b8', font: { size: 9 }, callback: v => `${v}%` }
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    async function fetchNasaPowerForCell(cell, gaezMetrics) {
+        const panel = document.getElementById('nasaPanelContent');
+        const fetchBadge = document.getElementById('nasaFetchBadge');
+        const cropKey = document.getElementById('cropSelect').value;
+        const crop = CROP_PARAMS[cropKey];
+
+        const end = new Date();
+        end.setDate(end.getDate() - 5);
+        const start = new Date(end);
+        start.setFullYear(end.getFullYear() - 1);
+
+        const startStr = formatNasaDate(start);
+        const endStr = formatNasaDate(end);
+        const cacheKey = `${cell.lat.toFixed(2)}_${cell.lng.toFixed(2)}_${startStr}_${endStr}`;
+
+        panel.innerHTML = `<p class="helper-hint" style="margin-top:8px;">Verificăm datele climatice din ultimele 12 luni pentru jud. ${cell.county}...</p>`;
+        fetchBadge.textContent = "Se încarcă...";
+
+        try {
+            let data;
+            if (nasaCache[cacheKey]) {
+                data = nasaCache[cacheKey];
+            } else {
+                const params = "T2M,T2M_MAX,T2M_MIN,PRECTOTCORR,ALLSKY_SFC_SW_DWN,GWETROOT";
+                const url = `https://power.larc.nasa.gov/api/temporal/daily/point?parameters=${params}&community=AG&longitude=${cell.lng}&latitude=${cell.lat}&start=${startStr}&end=${endStr}&format=JSON`;
+                const res = await fetch(url);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                data = await res.json();
+                nasaCache[cacheKey] = data;
+            }
+
+            const p = data.properties.parameter;
+            const dates = Object.keys(p.PRECTOTCORR || {}).sort();
+
+            let totalPrecip = 0;
+            let totalEt0 = 0;
+            let sumTmax = 0;
+            let sumGwet = 0;
+            let validDays = 0;
+
+            // 5 Specific Climatic Indicators from Photo 2
+            let dryDaysCount = 0;           // Zile cu precipitații < 1 mm/zi
+            let currentDryStreak = 0;
+            let maxDryStreak = 0;           // Cea mai lungă perioadă uscată (zile consecutive < 1 mm/zi)
+
+            let veryHotDaysCount = 0;       // Zile foarte calde: Tmax >= 35°C
+            let currentHotStreak = 0;
+            let maxHotStreak = 0;           // Cea mai lungă perioadă foarte caldă (zile consecutive Tmax >= 35°C)
+
+            const dailyRecords = [];
+
+            dates.forEach(dt => {
+                const precip = p.PRECTOTCORR[dt];
+                const tmax = p.T2M_MAX[dt];
+                const tmin = p.T2M_MIN[dt];
+                const t2m = p.T2M && p.T2M[dt] > -900 ? p.T2M[dt] : ((tmax + tmin) / 2);
+                const solar = p.ALLSKY_SFC_SW_DWN ? p.ALLSKY_SFC_SW_DWN[dt] : -999;
+                const gwet = p.GWETROOT ? p.GWETROOT[dt] : -999;
+
+                if (precip > -900 && tmax > -900 && tmin > -900) {
+                    const tmean = Number(t2m.toFixed(1));
+                    const td = Math.max(0, tmax - tmin);
+                    const et0 = solar > -900
+                        ? Math.max(0, 0.0023 * (tmean + 17.8) * Math.sqrt(td) * (solar * 0.408))
+                        : 0;
+
+                    totalPrecip += precip;
+                    totalEt0 += et0;
+                    sumTmax += tmax;
+                    if (gwet > -900) sumGwet += gwet;
+                    validDays++;
+
+                    // Indicator 2 & 3: Zile uscate (< 1 mm/zi) & Cea mai lungă perioadă uscată
+                    if (precip < 1.0) {
+                        dryDaysCount++;
+                        currentDryStreak++;
+                        if (currentDryStreak > maxDryStreak) maxDryStreak = currentDryStreak;
+                    } else {
+                        currentDryStreak = 0;
+                    }
+
+                    // Indicator 4 & 5: Zile foarte calde (Tmax >= 35°C) & Cea mai lungă perioadă foarte caldă
+                    if (tmax >= 35.0) {
+                        veryHotDaysCount++;
+                        currentHotStreak++;
+                        if (currentHotStreak > maxHotStreak) maxHotStreak = currentHotStreak;
+                    } else {
+                        currentHotStreak = 0;
+                    }
+
+                    const dObj = new Date(Date.UTC(
+                        parseInt(dt.slice(0, 4), 10),
+                        parseInt(dt.slice(4, 6), 10) - 1,
+                        parseInt(dt.slice(6, 8), 10)
+                    ));
+
+                    dailyRecords.push({
+                        dt,
+                        doy: getDayOfYear(dObj),
+                        label: formatShortRoDate(dt),
+                        tmax: Number(tmax.toFixed(1)),
+                        tmin: Number(tmin.toFixed(1)),
+                        tmean,
+                        precip: Number(precip.toFixed(1)),
+                        gwetPct: gwet > -900 ? Number((gwet * 100).toFixed(1)) : null
+                    });
+                }
+            });
+
+            const realWaterDeficit = Math.max(0, Math.round(totalEt0 - totalPrecip));
+            const avgTmax = (sumTmax / (validDays || 1)).toFixed(1);
+            const avgRootMoisture = sumGwet > 0 ? ((sumGwet / validDays) * 100).toFixed(0) : "N/A";
+            const precipTotalInt = Math.round(totalPrecip);
+
+            const gaezWde = gaezMetrics.wde;
+            const deficitDelta = realWaterDeficit - gaezWde;
+
+            let bannerClass = "ok";
+            let verdictText = "";
+            if (deficitDelta > 80 || (avgRootMoisture !== "N/A" && Number(avgRootMoisture) < 42) || maxDryStreak >= 25) {
+                bannerClass = "alert";
+                verdictText = `⚠️ Risc ridicat de secetă: S-au strâns ${precipTotalInt} mm precipitații, cu ${dryDaysCount} zile uscate (maxim ${maxDryStreak} zile consecutive fără ploaie) și ${veryHotDaysCount} zile cu arșiță ≥35°C.`;
+            } else if (deficitDelta > 15 || veryHotDaysCount >= 10) {
+                bannerClass = "warn";
+                verdictText = `⚡ Atenție la stresul hidric și termic: ${precipTotalInt} mm precipitații cumulate, ${maxDryStreak} zile consecutive uscate și ${veryHotDaysCount} zile cu Tmax ≥35°C.`;
+            } else {
+                bannerClass = "ok";
+                verdictText = `✅ Regim climatic echilibrat: ${precipTotalInt} mm precipitații cumulate, umiditate medie în sol ${avgRootMoisture}% și doar ${veryHotDaysCount} zile cu Tmax ≥35°C.`;
+            }
+
+            lastNasaAnalysis = {
+                precipTotalInt,
+                realWaterDeficit,
+                gaezWde,
+                deficitDelta,
+                avgTmax,
+                avgRootMoisture,
+                heatStressDays: veryHotDaysCount,
+                dryDaysCount,
+                maxDryStreak,
+                maxHotStreak,
+                verdictText
+            };
+
+            const sowDateText = dayOfYearToRomanianDate(gaezMetrics.cbd);
+            const harvestDoy = ((gaezMetrics.cbd + gaezMetrics.cyl - 1) % 365) + 1;
+            const harvestDateText = dayOfYearToRomanianDate(harvestDoy);
+
+            fetchBadge.textContent = `Actualizat (${validDays} zile)`;
+
+            panel.innerHTML = `
+                <!-- 5 Specific Climatic Indicators (Photo 2) -->
+                <div class="climate-kpi-grid">
+                    <div class="farmer-kpi climate-kpi-full">
+                        <div class="farmer-kpi-label">🌧️ 1. Precipitații cumulate (12 luni)</div>
+                        <div class="farmer-kpi-val" style="color:#38bdf8;">${precipTotalInt} mm <span style="font-size:0.78rem; font-weight:600; color:#94a3b8;">(${precipTotalInt} litri/m²)</span></div>
+                        <div class="farmer-kpi-sub">Umiditate medie rădăcini: ${avgRootMoisture}% • Maximă medie: ${avgTmax}°C</div>
+                    </div>
+
+                    <div class="farmer-kpi">
+                        <div class="farmer-kpi-label">🏜️ 2. Număr de zile uscate</div>
+                        <div class="farmer-kpi-val" style="color:#fbbf24;">${dryDaysCount} zile</div>
+                        <div class="farmer-kpi-sub">Zile cu precipitații &lt;1 mm/zi</div>
+                    </div>
+
+                    <div class="farmer-kpi">
+                        <div class="farmer-kpi-label">⏳ 3. Cea mai lungă perioadă uscată</div>
+                        <div class="farmer-kpi-val" style="color:#f97316;">${maxDryStreak} zile</div>
+                        <div class="farmer-kpi-sub">Zile consecutive cu &lt;1 mm/zi</div>
+                    </div>
+
+                    <div class="farmer-kpi">
+                        <div class="farmer-kpi-label">🔥 4. Număr de zile foarte calde</div>
+                        <div class="farmer-kpi-val" style="color:#ef4444;">${veryHotDaysCount} zile</div>
+                        <div class="farmer-kpi-sub">Zile cu Tmax ≥35°C</div>
+                    </div>
+
+                    <div class="farmer-kpi">
+                        <div class="farmer-kpi-label">🌡️ 5. Cea mai lungă perioadă foarte caldă</div>
+                        <div class="farmer-kpi-val" style="color:#f43f5e;">${maxHotStreak} zile</div>
+                        <div class="farmer-kpi-sub">Zile consecutive cu Tmax ≥35°C</div>
+                    </div>
+                </div>
+
+                <div class="comparison-banner ${bannerClass}">
+                    ${verdictText}
+                </div>
+
+                <!-- 3 Graphs in the Selected Crop's Specific Growing Interval (Photo 1) -->
+                <div class="crop-charts-wrapper">
+                    <div class="crop-cycle-header">
+                        <span class="crop-cycle-title">📈 Evoluție în intervalul culturii: ${crop.emoji} ${crop.name}</span>
+                        <span class="crop-cycle-window">${sowDateText} – ${harvestDateText} (${gaezMetrics.cyl} zile)</span>
+                    </div>
+
+                    <div class="mini-chart-box">
+                        <div class="mini-chart-title">
+                            <span>1. Temperatura aerului la 2 m (°C)</span>
+                            <span class="mini-chart-sub">T2M_MAX, T2M, T2M_MIN</span>
+                        </div>
+                        <div class="mini-chart-canvas-wrap">
+                            <canvas id="tempCycleChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="mini-chart-box">
+                        <div class="mini-chart-title">
+                            <span>2. Precipitațiile — sume săptămânale (mm)</span>
+                            <span class="mini-chart-sub">PRECTOTCORR</span>
+                        </div>
+                        <div class="mini-chart-canvas-wrap">
+                            <canvas id="precipCycleChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="mini-chart-box">
+                        <div class="mini-chart-title">
+                            <span>3. Saturația relativă modelată a solului (%)</span>
+                            <span class="mini-chart-sub">GWETROOT × 100 (medie 7 zile)</span>
+                        </div>
+                        <div class="mini-chart-canvas-wrap">
+                            <canvas id="soilCycleChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            renderCropIntervalCharts(dailyRecords, crop.name, gaezMetrics);
+
+            if (document.getElementById('autoAiOnClick') && document.getElementById('autoAiOnClick').checked) {
+                askLocalAi();
+            }
+
+        } catch (err) {
+            fetchBadge.textContent = 'Indisponibil';
+            panel.innerHTML = `<p class="helper-hint" style="color:#fca5a5; margin-top:8px;">Datele meteo nu s-au putut încărca acum. Verifică conexiunea la internet.</p>`;
+            lastNasaAnalysis = null;
+            if (document.getElementById('autoAiOnClick') && document.getElementById('autoAiOnClick').checked) {
+                askLocalAi();
+            }
+        }
+    }
+
+    async function selectAndAnalyzeCell(cell, switchToAdviceOnMobile = true) {
+        selectedCell = cell;
+        const cropKey = document.getElementById('cropSelect').value;
+        const mgmtKey = getCurrentMgmtKey();
+
+        const initialMetrics = computeCellMetrics(cell, cropKey, mgmtKey);
+        inspectCell(cell, initialMetrics);
+
+        if (switchToAdviceOnMobile && window.innerWidth <= 960) {
+            switchMobileTab('advice');
+        }
+
+        await fetchLiveGaezForCell(cell, cropKey, mgmtKey);
+        const updatedMetrics = computeCellMetrics(cell, cropKey, mgmtKey);
+
+        inspectCell(cell, updatedMetrics);
+        renderDashboard(false);
+        fetchNasaPowerForCell(cell, updatedMetrics);
+    }
+
+    function renderDashboard(allowAutoSelect = true) {
+        const selectedCounty = document.getElementById('countySelect').value;
+        const indicator = document.getElementById('indicatorSelect').value;
+        const cropKey = document.getElementById('cropSelect').value;
+        const mgmtKey = getCurrentMgmtKey();
+        updateLegend(indicator, cropKey);
+
+        rasterLayerGroup.clearLayers();
+
+        const filteredCells = selectedCounty === 'ALL'
+            ? gridCells
+            : gridCells.filter(c => c.county === selectedCounty);
+
+        filteredCells.forEach(cell => {
+            const metrics = computeCellMetrics(cell, cropKey, mgmtKey);
+            const val = getMetricValue(metrics, indicator);
+
+            const isSelected = selectedCell && selectedCell.id === cell.id;
+            const rect = L.rectangle(cell.bounds, {
+                color: isSelected ? '#ffffff' : 'rgba(15, 23, 42, 0.55)',
+                weight: isSelected ? 3 : 0.8,
+                fillColor: getColor(val, indicator, cropKey),
+                fillOpacity: 0.74
+            });
+
+            rect.bindTooltip(
+                `<strong>Jud. ${cell.county}</strong><br>` +
+                `${metrics.badgeLabel}<br>` +
+                `Recoltă estimată: <b>~${(metrics.ylx / 1000).toFixed(1)} t/ha</b>`,
+                { direction: 'top', opacity: 0.95 }
+            );
+
+            rect.on('click', function() {
+                selectAndAnalyzeCell(cell, true);
+            });
+
+            rect.addTo(rasterLayerGroup);
+        });
+
+        if (allowAutoSelect && filteredCells.length > 0 && (!selectedCell || (selectedCounty !== 'ALL' && selectedCell.county !== selectedCounty))) {
+            const defaultCell = filteredCells.find(c => c.county === 'Călărași') || filteredCells[0];
+            selectAndAnalyzeCell(defaultCell, false);
+        } else if (selectedCell) {
+            inspectCell(selectedCell, computeCellMetrics(selectedCell, cropKey, mgmtKey));
+        }
+
+        const isDecimalIndicator = (indicator === 'FC2' || indicator === 'FC1');
+        const allCountyStats = Object.keys(COUNTIES).map(cName => {
+            const cCells = gridCells.filter(c => c.county === cName);
+            const rawMean = cCells.reduce((acc, c) => {
+                const m = computeCellMetrics(c, cropKey, mgmtKey);
+                return acc + getMetricValue(m, indicator);
+            }, 0) / cCells.length;
+            const mean = isDecimalIndicator ? Number(rawMean.toFixed(2)) : Math.round(rawMean);
+            return { county: cName, mean };
+        }).sort((a, b) => b.mean - a.mean);
+
+        renderChart(allCountyStats, selectedCounty);
+    }
+
+    function renderChart(stats, selectedCounty) {
+        const ctx = document.getElementById('countyChart').getContext('2d');
+        if (countyChartInstance) countyChartInstance.destroy();
+
+        countyChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: stats.map(s => s.county),
+                datasets: [{
+                    label: 'Medie județ',
+                    data: stats.map(s => s.mean),
+                    backgroundColor: stats.map(s => s.county === selectedCounty ? '#10b981' : '#38bdf8'),
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { color: 'rgba(148,163,184,0.1)' }, ticks: { color: '#94a3b8', font: { size: 9 } } },
+                    y: { grid: { display: false }, ticks: { color: '#f8fafc', font: { size: 10 } } }
+                }
+            }
+        });
+    }
+
+    let aiAbortController = null;
+
+    async function askLocalAi() {
+        const button = document.getElementById('askAiBtn');
+        const result = document.getElementById('aiResult');
+        const cropKey = document.getElementById('cropSelect').value;
+        const mgmtKey = getCurrentMgmtKey();
+        const crop = CROP_PARAMS[cropKey];
+
+        const targetCell = selectedCell || gridCells[0];
+        const cellMetrics = computeCellMetrics(targetCell, cropKey, mgmtKey);
+
+        const allCropsRanking = Object.entries(CROP_PARAMS).map(([key, cfg]) => {
+            const m = computeCellMetrics(targetCell, key, mgmtKey);
+            return {
+                key,
+                emoji: cfg.emoji,
+                name: cfg.name,
+                six: m.six,
+                ylx: m.ylx,
+                cbd: m.cbd
+            };
+        }).sort((a, b) => b.six - a.six);
+
+        const cropsSummaryText = allCropsRanking
+            .map((c, idx) => `${idx + 1}. ${c.name}: recoltă estimată ${(c.ylx/1000).toFixed(1)} t/ha, scor ${c.six}/10000`)
+            .join('\n');
+
+        if (aiAbortController) {
+            aiAbortController.abort();
+        }
+        aiAbortController = new AbortController();
+
+        button.disabled = true;
+        result.textContent = `⏳ Pregătim planul pentru terenul tău din jud. ${targetCell.county}...`;
+
+        const nasaBlock = lastNasaAnalysis
+            ? `Date climatice ultimele 12 luni: precipitații cumulate ${lastNasaAnalysis.precipTotalInt} mm, ${lastNasaAnalysis.dryDaysCount} zile uscate (<1 mm/zi), cea mai lungă perioadă uscată ${lastNasaAnalysis.maxDryStreak} zile consecutive, ${lastNasaAnalysis.heatStressDays} zile foarte calde (Tmax ≥35°C), cea mai lungă perioadă foarte caldă ${lastNasaAnalysis.maxHotStreak} zile consecutive, umiditate medie sol ${lastNasaAnalysis.avgRootMoisture}%.`
+            : `Fără date meteo live momentan.`;
+
+        const prompt = `Ești un inginer agronom din România și vorbești cu un fermier care te întreabă simplu: „Am terenul acesta în județul ${targetCell.county} (${MGMT_PARAMS[mgmtKey].label}). Ce pot să fac cu el?”
+Cultura pe care o are în minte: ${crop.name} (recoltă estimată ${(cellMetrics.ylx/1000).toFixed(1)} tone/ha).
+Cele mai bune culturi aici:
+${cropsSummaryText}
+${nasaBlock}
+
+Răspunde în limba română clar, cald și practic (fără formule sau coduri științifice):
+1. **Ce merită să faci acum:** Spune pe scurt dacă ${crop.name} e o alegere bună sau dacă altceva aduce câștig mai sigur.
+2. **Plan pe 4 ani ca să nu obosești pământul:**
+   - **Anul 1:** [Cultura + de ce]
+   - **Anul 2:** [Cultura + cum ajută solul]
+   - **Anul 3:** [Cultura + de ce]
+   - **Anul 4:** [Cultura + de ce]
+3. **Un sfat practic de gospodar:** Cum să păstrezi apa în pământ în zona asta.`;
+
+        try {
+            const response = await fetch('http://localhost:11434/api/generate', {
+                method: 'POST',
+                signal: aiAbortController.signal,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: 'qwen2.5:3b',
+                    prompt,
+                    stream: false,
+                    options: { temperature: 0.3 }
+                })
+            });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
+            if (!data.response) throw new Error('Fără răspuns');
+            result.textContent = data.response.trim();
+        } catch (error) {
+            if (error.name === 'AbortError') return;
+            const c1 = allCropsRanking[0];
+            const c2 = allCropsRanking.find(c => c.key !== c1.key && ['wheat', 'barley', 'rapeseed'].includes(c.key)) || allCropsRanking[1];
+            const c3 = allCropsRanking.find(c => ['soybean', 'alfalfa', 'sunflower'].includes(c.key) && c.key !== c1.key && c.key !== c2.key) || allCropsRanking[2];
+            const c4 = allCropsRanking.find(c => c.key !== c1.key && c.key !== c2.key && c.key !== c3.key) || allCropsRanking[3];
+
+            result.textContent = `✅ Ce poți face cu terenul tău din jud. ${targetCell.county}:
+
+1. Alegerea cea mai sigură acum:
+Pe acest pământ, ${c1.name} are cele mai bune condiții (~${(c1.ylx/1000).toFixed(1)} tone/ha).
+
+2. Ordinea recomandată pe 4 ani (rotația culturilor):
+• Anul 1: ${c1.emoji} ${c1.name} — scoate cea mai bună recoltă din terenul actual.
+• Anul 2: ${c2.emoji} ${c2.name} — cultură păioasă care curăță terenul de buruieni.
+• Anul 3: ${c3.emoji} ${c3.name} — reface pământul și reduce riscul de secetă.
+• Anul 4: ${c4.emoji} ${c4.name} — echilibrează solul înainte să reiei ciclul.
+
+3. Sfat practic:
+După recoltare, toacă paiele sau resturile și lasă-le la suprafață ca să țină umezeala în sol.`;
+        } finally {
+            button.disabled = false;
+        }
+    }
+
+    ['countySelect', 'indicatorSelect', 'cropSelect'].forEach(id => {
+        document.getElementById(id).addEventListener('change', () => {
+            if (id === 'countySelect') {
+                const val = document.getElementById('countySelect').value;
+                if (val !== 'ALL' && COUNTIES[val]) {
+                    map.flyTo(COUNTIES[val].center, 9, { duration: 0.8 });
+                } else {
+                    map.flyTo([44.52, 26.55], 8, { duration: 0.8 });
+                }
+                renderDashboard(true);
+            } else if (id === 'cropSelect' && selectedCell) {
+                selectAndAnalyzeCell(selectedCell, false);
+            } else {
+                renderDashboard(false);
+            }
+        });
+    });
+
+    document.getElementById('askAiBtn').addEventListener('click', askLocalAi);
+
+    function resetEntireRegion() {
+        document.getElementById('countySelect').value = 'ALL';
+        map.flyTo([44.52, 26.55], 8, { duration: 0.8 });
+        renderDashboard(true);
+    }
+
+    function exportCsvReport() {
+        const selectedCounty = document.getElementById('countySelect').value;
+        const cropKey = document.getElementById('cropSelect').value;
+        const mgmtKey = getCurrentMgmtKey();
+
+        const filteredCells = selectedCounty === 'ALL'
+            ? gridCells
+            : gridCells.filter(c => c.county === selectedCounty);
+
+        const headers = [
+            'Zona_ID', 'Judet', 'Latitudine', 'Longitudine', 'Cultura', 'Mod_Lucru',
+            'Scor_Teren', 'Recolta_Estimata_kg_ha', 'Deficit_Apa_mm', 'Calificativ'
+        ];
+        const rows = filteredCells.map(cell => {
+            const m = computeCellMetrics(cell, cropKey, mgmtKey);
+            return [
+                cell.id,
+                `"${cell.county}"`,
+                cell.lat,
+                cell.lng,
+                `"${CROP_PARAMS[cropKey].name}"`,
+                `"${MGMT_PARAMS[mgmtKey].label}"`,
+                m.six,
+                m.ylx,
+                m.wde,
+                `"${m.badgeLabel}"`
+            ].join(',');
+        });
+
+        const csvContent = "﻿" + [headers.join(','), ...rows].join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `AgroSense_${selectedCounty}_${cropKey}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    document.getElementById('resetViewBtn').addEventListener('click', resetEntireRegion);
+    document.getElementById('exportCsvBtn').addEventListener('click', exportCsvReport);
+    document.getElementById('mobileResetBtn').addEventListener('click', resetEntireRegion);
+    document.getElementById('mobileExportBtn').addEventListener('click', exportCsvReport);
+
+    renderDashboard(true);
+</script>
+</body>
+</html>
